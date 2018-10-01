@@ -8,4 +8,6 @@ Created on Sun Oct 01 20:23:59 2017
 from Datos import Datos
 
 #dataset=Datos('f:/temp/german.data')
-dataset=Datos('f:/temp/tic-tac-toe.data')
+#dataset=Datos('f:/temp/tic-tac-toe.data')
+dataset=Datos('ConjuntosDatos/balloons.data')
+print(dataset.datos)
