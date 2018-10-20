@@ -48,23 +48,50 @@ class Clasificador(object):
 class ClasificadorNaiveBayes(Clasificador):
 
 
-    Clasificador.entrenamiento(dataset.extraeDatos(indicesTrain), )
+    Clasificador.entrenamiento(self,datostrain,atributosDiscretos,diccionario )
   # TODO: implementar
-  def entrenamiento(self,datostrain,atributosDiscretos,diccionario):
-      columns = np.column_stack(datostrain)
-      probabilidades = []
-      for col in columns:
+
+    def entrenamiento(self,datostrain,atributosDiscretos,diccionario):
+        columns = np.column_stack(datostrain)
+        probabilidades = []
+        clas = columns[-1]
+
+        for col in columns[:-1]:
+
           if atributosDiscretos[columns.index(col)] == "Nominal":
-              u, pob = np.unique(col,return_counts=True)
-              total = np.sum(pob)
-              dict = {}
-              for i in range(len(u)):
-                  dict.update(u[i],pob[i]/total)
-            probabilidades.append(dict)
-	pass
+
+            prob_clas = {}
+            for i in range(len(col)):
+
+                if col[i] not in prob_clas.keys():
+
+                    prob_clas.update(col[i]:{"T":0,"F":0})
+
+                prob_clas[col[i][clas[i]]] += 1
+
+            for i in col:
+                sum = prob_clas[col[i]["T"]] + prob_clas[col[i]["F"]]
+                prob_clas[i["T"]] = prob_clas[i["T"]] / sum
+                prob_clas[i["F"]] = prob_clas[i["F"]] / sum
+            probabilidades.append(prob_clas)
+
+
+          else:
+            pass
+
+        self.probabilidades = probabilidades
+	    pass
 
 
 
   # TODO: implementar
   def clasifica(self,datostest,atributosDiscretos,diccionario):
+        clasificador = []
+        for fila in atributosDiscretos:
+            prob = {"T":1,"F":1}
+            for i in range(len(fila)):
+                for key in prob:
+                    prob[key] = prob[key] * self.probabilidades[i[key]]
+            clasificador.append(prob)
+        self.clasificacion = clasificador
     pass
