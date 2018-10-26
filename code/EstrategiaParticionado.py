@@ -1,5 +1,9 @@
 from abc import ABCMeta,abstractmethod
+<<<<<<< HEAD:Plantillas/EstrategiaParticionado.py
 
+=======
+import numpy as np
+>>>>>>> ccd947ceaf0edbe860ff894d1c83aacb534d6559:code/EstrategiaParticionado.py
 
 class Particion():
 
@@ -14,7 +18,10 @@ class EstrategiaParticionado(object):
 
   # Clase abstracta
   __metaclass__ = ABCMeta
+<<<<<<< HEAD:Plantillas/EstrategiaParticionado.py
   numeroParticiones
+=======
+>>>>>>> ccd947ceaf0edbe860ff894d1c83aacb534d6559:code/EstrategiaParticionado.py
 
 
   # Atributos: deben rellenarse adecuadamente para cada estrategia concreta: nombreEstrategia, numeroParticiones, listaParticiones. Se pasan en el constructor
@@ -29,6 +36,7 @@ class EstrategiaParticionado(object):
 
 class ValidacionSimple(EstrategiaParticionado):
 
+<<<<<<< HEAD:Plantillas/EstrategiaParticionado.py
   # Crea particiones segun el metodo tradicional de division de los datos segun el porcentaje deseado.
   # Devuelve una lista de particiones (clase Particion)
   # TODO: implementar
@@ -48,6 +56,31 @@ class ValidacionSimple(EstrategiaParticionado):
         par.indicesTrain.append(permutacion[:self.porcentaje*len(datos)])
         par.indicesTest.append(permutacion[self.porcentaje*len(datos):])
     return par
+=======
+    # Crea particiones segun el metodo tradicional de division de los datos segun el porcentaje deseado.
+    # Devuelve una lista de particiones (clase Particion)
+    # TODO: implementar
+
+    def creaParticiones(self,datos,seed=None):
+        par = Particion()
+        k = int(round(self.porcentaje*len(datos.datos)))
+        perms = np.arange(len(datos.datos))
+        permutacion = np.random.permutation(perms)
+        par.indicesTrain = (np.append(par.indicesTrain, permutacion[:k])).astype(int)
+        par.indicesTest = (np.append(par.indicesTest, permutacion[k:])).astype(int)
+        return par
+
+
+    def __init__(self, nombreEstrategia, numeroParticiones, porcentaje, dataset):
+        self.nombreEstrategia= nombreEstrategia
+        self.numeroParticiones = numeroParticiones
+        self.porcentaje = porcentaje
+        self.particiones = {}
+        for particion in range(numeroParticiones):
+            self.particiones[particion] = self.creaParticiones(dataset)
+
+    
+>>>>>>> ccd947ceaf0edbe860ff894d1c83aacb534d6559:code/EstrategiaParticionado.py
 
 
 #####################################################################################################
@@ -57,6 +90,7 @@ class ValidacionCruzada(EstrategiaParticionado):
   # El conjunto de entrenamiento se crea con las nfolds-1 particiones y el de test con la particion restante
   # Esta funcion devuelve una lista de particiones (clase Particion)
   # TODO: implementar
+<<<<<<< HEAD:Plantillas/EstrategiaParticionado.py
 
   def __init__(self, nombreEstrategia, numeroParticiones, listaParticiones):
       self.nombreEstrategia = nombreEstrategia
@@ -74,6 +108,31 @@ class ValidacionCruzada(EstrategiaParticionado):
 
 
 #####################################################################################################
+=======
+    def creaParticiones(self,datos,seed=None):
+        particiones = {}
+        perms = np.arange(len(datos.datos))
+        permutacion = np.random.permutation(perms)
+
+        for i in range(0,len(datos.datos), self.numeroParticiones):
+            par = Particion()
+            par.indicesTest = np.append([],permutacion[i:i+self.numeroParticiones]).astype(int)
+            par.indicesTrain = np.append(permutacion[:i], permutacion[i+self.numeroParticiones:]).astype(int)
+            particiones[i] = par
+
+        return particiones
+
+    
+    def __init__(self, nombreEstrategia, numeroParticiones, dataset):
+        self.nombreEstrategia = nombreEstrategia
+        self.numeroParticiones = numeroParticiones
+        self.particiones = {}
+        self.particiones = self.creaParticiones(dataset)
+
+  
+
+    #####################################################################################################
+>>>>>>> ccd947ceaf0edbe860ff894d1c83aacb534d6559:code/EstrategiaParticionado.py
 class ValidacionBootstrap(EstrategiaParticionado):
 
   # Crea particiones segun el metodo de validacion por bootstrap.
