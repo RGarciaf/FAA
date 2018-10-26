@@ -98,5 +98,9 @@ class Datos ( object ):
 
 
     def extraeDatos(self, idx):
-
-        pass
+        subconjunto = []
+        for i in idx:
+            subconjunto = np.append(subconjunto, self.datos[i])
+        subconjunto = subconjunto.reshape((len(idx), len(self.nombreAtributos)))
+        return subconjunto
+        

@@ -14,9 +14,8 @@ class EstrategiaParticionado(object):
 
   # Clase abstracta
   __metaclass__ = ABCMeta
-  nombreEstrategia
   numeroParticiones
-  listaParticiones
+
 
   # Atributos: deben rellenarse adecuadamente para cada estrategia concreta: nombreEstrategia, numeroParticiones, listaParticiones. Se pasan en el constructor
 
