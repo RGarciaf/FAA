@@ -49,21 +49,27 @@ class Clasificador(object):
 
 class ClasificadorNaiveBayes(Clasificador):
 
-    def __init__(self):
+    def __init__(self, laplace = False):
         self.probabilidades = []
+        self.laplace = laplace
 
   # TODO: implementar
-
+        
     def entrenamiento(self,datostrain,atributosDiscretos,diccionario):
         columns = np.column_stack(datostrain)
         probabilidades = []
         clas = columns[-1]
-        ini_clas = {}
         c, counts = np.unique(columns[-1], return_counts=True)
         p_class = dict(zip(c.astype(int), counts))
-       
-        for key in diccionario["Class"]:
-            ini_clas.update({int(diccionario["Class"][key]):0})
+        
+        if (self.laplace):
+            ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 1)
+            for key in p_class:
+                p_class[key] += 1
+        else:
+            ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 0)
+            
+        
         for key in diccionario:
             if key == "Class":
                 pass
@@ -101,43 +107,20 @@ class ClasificadorNaiveBayes(Clasificador):
 
 
   # TODO: implementar
-    def clasifica(self,datostest,atributosDiscretos,diccionario):
-        clasificador = []
-        # print("datos: ",datostest)
-        # for filad, filap in zip(datostest, self.probabilidades):
-        for filad in datostest:
-            prob = {}
-            for clas in diccionario["Class"]:
-                prob.update({diccionario["Class"][clas]:1})
-
-            for value, pattr in zip(filad,self.probabilidades):
-                for clas in pattr[value]:
-                    prob[clas] *= pattr[value][clas]
-            # for valued in filad :
-            #     for clas in filap[valued]:
-            #         prob[clas] *= filap[valued][clas]
-            suma = np.sum(list(prob.values()))
-            max = 0
-            decision = ""
-            for clas in diccionario["Class"]:
-                prob[diccionario["Class"][clas]] = prob[diccionario["Class"][clas]]/suma
-                if max < prob[diccionario["Class"][clas]]:
-                    max = prob[diccionario["Class"][clas]]
-                    decision = clas
-            clasificador.append({decision:max})
+           
             
-            
-    def clasificaP(self, datostest,atributosDiscretos,diccionario):
+    def clasifica(self, datostest,atributosDiscretos,diccionario):
         columns = np.column_stack(datostest)
         c, counts = np.unique(columns[-1], return_counts=True)
         p_class = dict(zip(c.astype(int), counts))
-
+        ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 0)
         clasifica = {}
+        cla = []
         clas = columns[-1]
         for index_col in range(len(columns[:-1])):
             if atributosDiscretos[index_col] == "Nominal":
-                for value in self.probabilidades[index_col]:   
-                    posterior, num = [], []
+                for value in self.probabilidades[index_col]: 
+                    posterior, num, clasifica = [], [] , {}
                     for i in self.probabilidades[index_col][value]:
                        
                         verosimilitud = self.probabilidades[index_col][value][i] 
@@ -147,9 +130,8 @@ class ClasificadorNaiveBayes(Clasificador):
                     if (den > 0):
                         for x in num:
                             posterior.append(round (x / den, 2))
-                        print(posterior.index(max(posterior)), max(posterior),  posterior)
                         clasifica.update({posterior.index(max(posterior)):max(posterior)})
-        
-        return clasifica
+                    cla.append(clasifica)
+        return cla
                 
         #print(clasificador)
