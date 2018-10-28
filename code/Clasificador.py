@@ -1,5 +1,6 @@
 from abc import ABCMeta,abstractmethod
 import numpy as np
+from scipy.stats import norm
 #from tabulate import tabulate
 
 class Clasificador(object):
@@ -80,9 +81,10 @@ class ClasificadorNaiveBayes(Clasificador):
                 probabilidades.append(prob_clas)
         
         for index_col in range(len(columns[:-1])):
-
+            print("hola", columns[index_col])
             if atributosDiscretos[index_col] == "Nominal":
-                for i in range(len(columns[index_col])):      
+                for i in range(len(columns[index_col])):
+                    print("asdfasdf", probabilidades[index_col], probabilidades[index_col][columns[index_col][i]], probabilidades[index_col][columns[index_col][i]][int(clas[i])])
                     probabilidades[index_col][columns[index_col][i]][int(clas[i])] += 1  
            
                 
@@ -93,6 +95,8 @@ class ClasificadorNaiveBayes(Clasificador):
 
 
             else:
+                probabilidades[index_col][columns[index_col][0]] = np.mean(columns[index_col])
+                probabilidades[index_col][columns[index_col][1]] = np.std(columns[index_col])
                 pass
 
         self.probabilidades = probabilidades
@@ -132,6 +136,9 @@ class ClasificadorNaiveBayes(Clasificador):
                             posterior.append(round (x / den, 2))
                         clasifica.update({posterior.index(max(posterior)):max(posterior)})
                     cla.append(clasifica)
+                    
+            else:
+                norm.pdf(x,mean,std)
         return cla
                 
         #print(clasificador)
