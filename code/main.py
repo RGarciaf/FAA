@@ -14,20 +14,18 @@ from tabulate import tabulate
 # In[ ]:
 
 
-dataset = Datos("ConjuntosDatos/tic-tac-toe.data")
+dataset = Datos("ConjuntosDatos/balloons.data")
 estrategiaS = ValidacionSimple('ValidacionSimple', 5, 0.5, dataset)
-print(dataset.diccionarios)
 print("Estrategia Validacion Simple:")
+clas = ClasificadorNaiveBayes()
 for i in estrategiaS.particiones.keys():
     # print("test: ", estrategiaS.particiones[i].indicesTest)
     # print("train: ", estrategiaS.particiones[i].indicesTrain)
-    clas = ClasificadorNaiveBayes()
 
-    clas.entrenamiento(dataset.extraeDatos(range(950)), dataset.tipoAtributos, dataset.diccionarios)
-    print(clas.probabilidades)
-    print(np.column_stack(dataset.extraeDatos(range(950)))[-1])
-    clas.clasifica(dataset.extraeDatos(range(950)), dataset.tipoAtributos, dataset.diccionarios)
-    print("\n")
+    clas.entrenamiento(dataset.extraeDatos(estrategiaS.particiones[i].indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
+# print(np.column_stack(dataset.extraeDatos(range(950)))[-1])
+    print(clas.clasifica(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), dataset.tipoAtributos, dataset.diccionarios))
+    print("\n",clas.error(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), clas.clasificador))
 
     # clas.entrenamiento(dataset.extraeDatos(estrategiaS.particiones[i].indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
     # print(clas.probabilidades)
@@ -42,4 +40,3 @@ for i in estrategiaS.particiones.keys():
 # for i in estrategiaC.particiones.keys():
 #     print("test: ", estrategiaC.particiones[i].indicesTest)
 #     print("train: ", estrategiaC.particiones[i].indicesTrain)
-
