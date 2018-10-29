@@ -15,17 +15,20 @@ from tabulate import tabulate
 
 
 dataset = Datos("ConjuntosDatos/german.data")
-estrategiaS = ValidacionSimple('ValidacionSimple', 5, 0.5, dataset)
+estrategiaS = ValidacionSimple()
 print("Estrategia Validacion Simple:")
 clas = ClasificadorNaiveBayes()
-for i in estrategiaS.particiones.keys():
-    # print("test: ", estrategiaS.particiones[i].indicesTest)
-    # print("train: ", estrategiaS.particiones[i].indicesTrain)
 
-    clas.entrenamiento(dataset.extraeDatos(estrategiaS.particiones[i].indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
-# print(np.column_stack(dataset.extraeDatos(range(950)))[-1])
-    clas.clasifica(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), dataset.tipoAtributos, dataset.diccionarios)
-    print("Error: ",clas.error(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), clas.clasificador), "\n")
+print(Clasificador.ClasificadorNaiveBayes().validacion(estrategiaS,dataset,clas))
+# estrategiaS.creaParticiones(dataset)
+# for i in estrategiaS.particiones:
+#     # print("test: ", estrategiaS.particiones[i].indicesTest)
+#     # print("train: ", estrategiaS.particiones[i].indicesTrain)
+#
+#     clas.entrenamiento(dataset.extraeDatos(i.indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
+# # print(np.column_stack(dataset.extraeDatos(range(950)))[-1])
+#     clas.clasifica(dataset.extraeDatos(i.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
+#     print("Error: ",clas.error(dataset.extraeDatos(i.indicesTest), clas.clasificacion), "\n")
 
     # clas.entrenamiento(dataset.extraeDatos(estrategiaS.particiones[i].indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
     # print(clas.probabilidades)
