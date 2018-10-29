@@ -32,7 +32,6 @@ class Clasificador(object):
     #     # Aqui se compara la prediccion (pred) con las clases reales y se calcula el error
         clases = np.column_stack(datos)[-1]
         error = 0
-        print(pred)
         for clase, clase_pred in zip(clases, pred):
             if clase != list(clase_pred.keys())[0]:
                 error += 1
@@ -46,11 +45,10 @@ class Clasificador(object):
     # TODO: implementar esta funcion
     def validacion(self,particionado,dataset,clasificador,seed=None):
         errores = []
-        for particion in list(particionado.particiones.values()):
+        particionado.creaParticiones(dataset)
+        for particion in particionado.particiones:
             clasificador.entrenamiento(dataset.extraeDatos(particion.indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
-            print(clasificador.probabilidades)
-            clasificacion = clasificador.entrenamiento(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
-            print(clasificador.clasificacion)
+            clasificacion = clasificador.clasifica(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
             errores.append(clasificador.error(dataset.extraeDatos(particion.indicesTest), clasificacion))
         return errores
     #     # Creamos las particiones siguiendo la estrategia llamando a particionado.creaParticiones
@@ -58,7 +56,7 @@ class Clasificador(object):
     #     # y obtenemos el error en la particion de test i
     #     # - Para validacion simple (hold-out): entrenamos el clasificador con la particion de train
     #     # y obtenemos el error en la particion test
-        
+
 
 
 ##############################################################################
@@ -80,7 +78,6 @@ class ClasificadorNaiveBayes(Clasificador):
         c, counts = np.unique(columns[-1], return_counts=True)
         p_class = dict(zip(c.astype(int), counts))
 
-
         if (self.laplace):
             ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 1)
             for key in p_class:
@@ -98,12 +95,12 @@ class ClasificadorNaiveBayes(Clasificador):
                 prob_clas = {}
                 if atributosDiscretos[list(diccionario.keys()).index(key)] == "Nominal":
                     for value in diccionario[key]:
-                        prob_clas.update({int(diccionario[key][value]):ini_clas.copy()})                        
+                        prob_clas.update({int(diccionario[key][value]):ini_clas.copy()})
                 else:
                     for value in diccionario["Class"]:
                         prob_clas.update({int(diccionario["Class"][value]):[]})
                 probabilidades.append(prob_clas)
-                
+
 
         for index_col in range(len(columns[:-1])):
 
@@ -120,11 +117,11 @@ class ClasificadorNaiveBayes(Clasificador):
             else:
                 for key in probabilidades[index_col]:
                     probabilidades[index_col][key] = {"media":np.mean(probabilidades[index_col][key]),"dp":np.std(probabilidades[index_col][key])}
-        
+
         self.probabilidades = probabilidades
-       
+
     def clasifica(self,datostest,atributosDiscretos,diccionario):
-        
+
         prob_ini = {}
         for clas in diccionario["Class"]:
             prob_ini.update({diccionario["Class"][clas]:1})
@@ -132,11 +129,11 @@ class ClasificadorNaiveBayes(Clasificador):
         clasificacion = []
         printer = []
         for filad in datostest:
-            prob = prob_ini.copy()                        
-            for value, pattr in zip(filad,self.probabilidades):                
+            prob = prob_ini.copy()
+            for value, pattr in zip(filad,self.probabilidades):
                 for clas in prob_ini:
                     if atributosDiscretos[self.probabilidades.index(pattr)] == "Nominal":
-                        
+
                         prob[clas] *= pattr[value][clas] * self.prior[clas]
                     else:
                         prob[clas] *= norm.pdf(value, pattr[clas]["media"], pattr[clas]["dp"])
@@ -156,7 +153,6 @@ class ClasificadorNaiveBayes(Clasificador):
             printer.append({decision:round(max,3)})
 
         self.clasificacion = clasificacion
-        print(clasificacion)
         return clasificacion
 
     #

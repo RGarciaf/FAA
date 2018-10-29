@@ -34,24 +34,27 @@ class ValidacionSimple(EstrategiaParticionado):
     # TODO: implementar
 
     def creaParticiones(self,datos,seed=None):
-        par = Particion()
-        k = int(round(self.porcentaje*len(datos.datos)))
-        perms = np.arange(len(datos.datos))
-        permutacion = np.random.permutation(perms)
-        par.indicesTrain = (np.append(par.indicesTrain, permutacion[:k])).astype(int)
-        par.indicesTest = (np.append(par.indicesTest, permutacion[k:])).astype(int)
-        return par
 
 
-    def __init__(self, nombreEstrategia, numeroParticiones, porcentaje, dataset):
-        self.nombreEstrategia= nombreEstrategia
+        for i in range(self.numeroParticiones):
+            par = Particion()
+            k = int(round(self.porcentaje*len(datos.datos)))
+            perms = np.arange(len(datos.datos))
+            permutacion = np.random.permutation(perms)
+            par.indicesTrain = (np.append(par.indicesTrain, permutacion[:k])).astype(int)
+            par.indicesTest = (np.append(par.indicesTest, permutacion[k:])).astype(int)
+            self.particiones.append(par)
+        return self.particiones
+
+
+    def __init__(self, numeroParticiones = 5, porcentaje = 0.6):
+        self.nombreEstrategia= "Validacion Simple"
         self.numeroParticiones = numeroParticiones
         self.porcentaje = porcentaje
-        self.particiones = {}
-        for particion in range(numeroParticiones):
-            self.particiones[particion] = self.creaParticiones(dataset)
+        self.particiones = []
 
-    
+
+
 
 
 #####################################################################################################
@@ -62,7 +65,6 @@ class ValidacionCruzada(EstrategiaParticionado):
   # Esta funcion devuelve una lista de particiones (clase Particion)
   # TODO: implementar
     def creaParticiones(self,datos,seed=None):
-        particiones = {}
         perms = np.arange(len(datos.datos))
         permutacion = np.random.permutation(perms)
 
@@ -70,44 +72,41 @@ class ValidacionCruzada(EstrategiaParticionado):
             par = Particion()
             par.indicesTest = np.append([],permutacion[i:i+self.numeroParticiones]).astype(int)
             par.indicesTrain = np.append(permutacion[:i], permutacion[i+self.numeroParticiones:]).astype(int)
-            particiones[i] = par
+            self.particiones.append(par)
 
-        return particiones
+        return self.particiones
 
-    
-    def __init__(self, nombreEstrategia, numeroParticiones, dataset):
+
+    def __init__(self, numeroParticiones = 5):
         self.nombreEstrategia = nombreEstrategia
         self.numeroParticiones = numeroParticiones
-        self.particiones = {}
-        self.particiones = self.creaParticiones(dataset)
+        self.particiones = []
 
-  
+
 
     #####################################################################################################
 class ValidacionBootstrap(EstrategiaParticionado):
-    
+
   # Crea particiones segun el metodo de validacion por bootstrap.
   # Esta funcion devuelve una lista de particiones (clase Particion)
-  
+
   # TODO: implementar
-      
+
     def creaParticiones(self, datos,seed=None):
-        particiones = {}
+        particiones = []
         perms = np.arange(len(datos.datos))
         for i in range(self.numeroParticiones):
             par = Particion()
             for _ in range(self.tamParticion):
                 par.indicesTest = np.append(par.indicesTest,random.choice(perms)).astype(int)
             par.indicesTrain = np.setdiff1d(perms, par.indicesTest)
-            particiones[i] = par
-        return particiones
-    
-    
-    def __init__(self, nombreEstrategia, numeroParticiones, tamParticion, dataset):
-        self.nombreEstrategia = nombreEstrategia
+            self.particiones.append(par)
+        return self.particiones
+
+
+    def __init__(self, numeroParticiones = 5, tamParticion = 2):
+        self.nombreEstrategia = "Validacion Bootstrap"
         self.numeroParticiones = numeroParticiones
         self.tamParticion = tamParticion
         self.particiones = {}
         self.particiones = self.creaParticiones(dataset)
-
-  
