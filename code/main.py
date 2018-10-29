@@ -14,7 +14,7 @@ from tabulate import tabulate
 # In[ ]:
 
 
-dataset = Datos("ConjuntosDatos/balloons.data")
+dataset = Datos("ConjuntosDatos/german.data")
 estrategiaS = ValidacionSimple('ValidacionSimple', 5, 0.5, dataset)
 print("Estrategia Validacion Simple:")
 clas = ClasificadorNaiveBayes()
@@ -24,8 +24,8 @@ for i in estrategiaS.particiones.keys():
 
     clas.entrenamiento(dataset.extraeDatos(estrategiaS.particiones[i].indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
 # print(np.column_stack(dataset.extraeDatos(range(950)))[-1])
-    print(clas.clasifica(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), dataset.tipoAtributos, dataset.diccionarios))
-    print("\n",clas.error(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), clas.clasificador))
+    clas.clasifica(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), dataset.tipoAtributos, dataset.diccionarios)
+    print("Error: ",clas.error(dataset.extraeDatos(estrategiaS.particiones[i].indicesTest), clas.clasificador), "\n")
 
     # clas.entrenamiento(dataset.extraeDatos(estrategiaS.particiones[i].indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
     # print(clas.probabilidades)
