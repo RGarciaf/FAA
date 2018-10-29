@@ -30,7 +30,15 @@ class Clasificador(object):
     # TODO: implementar
     def error(self,datos,pred):
     #     # Aqui se compara la prediccion (pred) con las clases reales y se calcula el error
-        pass
+        clases = np.column_stack(datos)[-1]
+        error = 0
+        for clase, clase_pred in zip(clases, pred):
+            print(clase, list(clase_pred.keys())[0])
+            if clase != list(clase_pred.keys())[0]:
+                error += 1
+
+        error = error/int(len(datos))
+        return error
 
 
 
@@ -52,52 +60,62 @@ class ClasificadorNaiveBayes(Clasificador):
 
     def __init__(self, laplace = False):
         self.probabilidades = []
+        self.clasificador = []
         self.laplace = laplace
+        self.prior = {}
 
   # TODO: implementar
-        
+
     def entrenamiento(self,datostrain,atributosDiscretos,diccionario):
         columns = np.column_stack(datostrain)
         probabilidades = []
         clas = columns[-1]
         c, counts = np.unique(columns[-1], return_counts=True)
         p_class = dict(zip(c.astype(int), counts))
-        
+
+
         if (self.laplace):
             ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 1)
             for key in p_class:
                 p_class[key] += 1
+            self.prior = dict(zip(c.astype(int), ((counts + 1) / (len(datostrain) + len(p_class)))))
+            print(c, counts, counts + 1,len(datostrain), len(p_class),  ((counts + 1) / (len(datostrain) + len(p_class))))
         else:
             ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 0)
-            
-        
+            self.prior = dict(zip(c.astype(int), counts / len(columns)))
+
+
         for key in diccionario:
             if key == "Class":
                 pass
             else:
                 prob_clas = {}
-                for value in diccionario[key]:
-                    prob_clas.update({int(diccionario[key][value]):ini_clas.copy()})
+                if atributosDiscretos[list(diccionario.keys()).index(key)] == "Nominal":
+                    for value in diccionario[key]:
+                        prob_clas.update({int(diccionario[key][value]):ini_clas.copy()})
+                else:
+                    prob_clas = []
                 probabilidades.append(prob_clas)
-        
+
         for index_col in range(len(columns[:-1])):
-            print("hola", columns[index_col])
+
+            for i in range(len(columns[index_col])):
+                if atributosDiscretos[index_col] == "Nominal":
+                    probabilidades[index_col][columns[index_col][i]][int(clas[i])] += 1
+                else:
+                    probabilidades[index_col].append(columns[index_col][i])
+
             if atributosDiscretos[index_col] == "Nominal":
-                for i in range(len(columns[index_col])):
-                    print("asdfasdf", probabilidades[index_col], probabilidades[index_col][columns[index_col][i]], probabilidades[index_col][columns[index_col][i]][int(clas[i])])
-                    probabilidades[index_col][columns[index_col][i]][int(clas[i])] += 1  
-           
-                
                 for value in probabilidades[index_col]:
-                   
                     for i in probabilidades[index_col][value]:
                         probabilidades[index_col][value][i] = round(probabilidades[index_col][value][i] / p_class[i], 2)
-
-
             else:
-                probabilidades[index_col][columns[index_col][0]] = np.mean(columns[index_col])
-                probabilidades[index_col][columns[index_col][1]] = np.std(columns[index_col])
-                pass
+                probabilidades[index_col] = {"media":np.mean(probabilidades[index_col]),"dp":np.std(probabilidades[index_col])}
+
+            # else:
+            #     probabilidades[index_col][columns[index_col][0]] = np.mean(columns[index_col])
+            #     probabilidades[index_col][columns[index_col][1]] = np.std(columns[index_col])
+            #     pass
 
         self.probabilidades = probabilidades
         # attrs = list(diccionario.keys())
@@ -111,34 +129,65 @@ class ClasificadorNaiveBayes(Clasificador):
 
 
   # TODO: implementar
-           
-            
-    def clasifica(self, datostest,atributosDiscretos,diccionario):
-        columns = np.column_stack(datostest)
-        c, counts = np.unique(columns[-1], return_counts=True)
-        p_class = dict(zip(c.astype(int), counts))
-        ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 0)
-        clasifica = {}
-        cla = []
-        clas = columns[-1]
-        for index_col in range(len(columns[:-1])):
-            if atributosDiscretos[index_col] == "Nominal":
-                for value in self.probabilidades[index_col]: 
-                    posterior, num, clasifica = [], [] , {}
-                    for i in self.probabilidades[index_col][value]:
-                       
-                        verosimilitud = self.probabilidades[index_col][value][i] 
-                        prior = p_class[i] / len(columns[index_col])
-                        num.append(verosimilitud * prior)
-                    den = sum(num)
-                    if (den > 0):
-                        for x in num:
-                            posterior.append(round (x / den, 2))
-                        clasifica.update({posterior.index(max(posterior)):max(posterior)})
-                    cla.append(clasifica)
-                    
-            else:
-                norm.pdf(x,mean,std)
-        return cla
-                
-        #print(clasificador)
+
+    def clasifica(self,datostest,atributosDiscretos,diccionario):
+        clasificador = []
+        # print("datos: ",datostest)
+        # for filad, filap in zip(datostest, self.probabilidades):
+        for filad in datostest:
+            prob = {}
+            for clas in diccionario["Class"]:
+                prob.update({diccionario["Class"][clas]:1})
+
+            for value, pattr in zip(filad,self.probabilidades):
+                for clas in pattr[value]:
+                    prob[clas] *= pattr[value][clas] * self.prior[clas]
+            # for valued in filad :
+            #     for clas in filap[valued]:
+            #         prob[clas] *= filap[valued][clas]
+            suma = np.sum(list(prob.values()))
+
+            max = 0
+            decision = ""
+            for clas in diccionario["Class"]:
+                if suma == 0:
+                    prob[diccionario["Class"][clas]] = 0
+                else:
+                    prob[diccionario["Class"][clas]] = prob[diccionario["Class"][clas]]/suma
+                if max <= prob[diccionario["Class"][clas]]:
+                    max = prob[diccionario["Class"][clas]]
+                    decision = clas
+            clasificador.append({diccionario["Class"][decision]:round(max,3)})
+        self.clasificador = clasificador
+        return clasificador
+
+    #
+    # def clasifica(self, datostest,atributosDiscretos,diccionario):
+    #     columns = np.column_stack(datostest)
+    #     c, counts = np.unique(columns[-1], return_counts=True)
+    #     p_class = dict(zip(c.astype(int), counts))
+    #     ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 0)
+    #     clasifica = {}
+    #     cla = []
+    #     clas = columns[-1]
+    #     for index_col in range(len(columns[:-1])):
+    #         if atributosDiscretos[index_col] == "Nominal":
+    #             for value in self.probabilidades[index_col]:
+    #                 posterior, num, clasifica = [], [] , {}
+    #                 for i in self.probabilidades[index_col][value]:
+    #
+    #                     verosimilitud = self.probabilidades[index_col][value][i]
+    #                     prior = p_class[i] / len(columns[index_col])
+    #                     num.append(verosimilitud * prior)
+    #                 den = sum(num)
+    #                 if (den > 0):
+    #                     for x in num:
+    #                         posterior.append(round (x / den, 2))
+    #                     clasifica.update({posterior.index(max(posterior)):max(posterior)})
+    #                 cla.append(clasifica)
+    #
+    #         else:
+    #             norm.pdf(x,mean,std)
+    #     return cla
+    #
+    #     #print(clasificador)
