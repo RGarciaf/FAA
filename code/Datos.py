@@ -3,6 +3,15 @@ import numpy as np
 class Datos ( object ):
     TiposDeAtributos = ('Continuo','Nominal')
 
+    def attrsToIndex():
+        nominal = []
+        for atributo in Datos.tipoAtributos:
+            if(atributo == "Nominal"):
+                nominal.append(1)
+            else:
+                nominal.append(0)
+        self.nominalAtributos = nominal
+        
     def parseMetaDatos(fichero):
         """  Parsea las tres primeras lineas del fichero  """
 
@@ -94,8 +103,11 @@ class Datos ( object ):
 
         self.datos, self.diccionarios, self.nombreAtributos, self.tipoAtributos = Datos.transformDataToArray(filename)
 
+       
         pass
 
+    
+        
 
     def extraeDatos(self, idx):
         subconjunto = []
