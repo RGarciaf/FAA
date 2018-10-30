@@ -15,7 +15,7 @@ from tabulate import tabulate
 
 
 dataset = Datos("ConjuntosDatos/balloons.data")
-print(dataset.nominal, "\n", dataset.tipoAtributos)
+print(dataset.nominalAtributos, "\n", dataset.tipoAtributos)
 # estrategiaS = ValidacionSimple()
 # print("Estrategia Validacion Simple:")
 # clas = ClasificadorNaiveBayes()
