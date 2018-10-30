@@ -14,12 +14,14 @@ from tabulate import tabulate
 # In[ ]:
 
 
-dataset = Datos("ConjuntosDatos/german.data")
-estrategiaS = ValidacionSimple()
-print("Estrategia Validacion Simple:")
-clas = ClasificadorNaiveBayes()
+dataset = Datos("ConjuntosDatos/balloons.data")
+print(dataset.nominal, "\n", dataset.tipoAtributos)
+# estrategiaS = ValidacionSimple()
+# print("Estrategia Validacion Simple:")
+# clas = ClasificadorNaiveBayes()
 
-print(Clasificador.ClasificadorNaiveBayes().validacion(estrategiaS,dataset,clas))
+# print(Clasificador.ClasificadorNaiveBayes().validacion(estrategiaS,dataset,clas))
+
 # estrategiaS.creaParticiones(dataset)
 # for i in estrategiaS.particiones:
 #     # print("test: ", estrategiaS.particiones[i].indicesTest)

@@ -102,7 +102,7 @@ class Datos ( object ):
     def __init__ ( self, filename ):
 
         self.datos, self.diccionarios, self.nombreAtributos, self.tipoAtributos = Datos.transformDataToArray(filename)
-
+        self.nominal = self.attrToIndex()
        
         pass
 
@@ -116,3 +116,11 @@ class Datos ( object ):
         subconjunto = subconjunto.reshape((len(idx), len(self.nombreAtributos)))
         return subconjunto
         
+    def attrToIndex(self):
+        nominal = []
+        for atributo in self.tipoAtributos:
+            if(atributo == "Nominal"):
+                nominal.append(1)
+            else:
+                nominal.append(0)
+        return nominal
