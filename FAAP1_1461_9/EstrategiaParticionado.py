@@ -78,7 +78,7 @@ class ValidacionCruzada(EstrategiaParticionado):
 
 
     def __init__(self, numeroParticiones = 5):
-        self.nombreEstrategia = nombreEstrategia
+        self.nombreEstrategia = "Validacion Cruzada"
         self.numeroParticiones = numeroParticiones
         self.particiones = []
 
@@ -108,5 +108,4 @@ class ValidacionBootstrap(EstrategiaParticionado):
         self.nombreEstrategia = "Validacion Bootstrap"
         self.numeroParticiones = numeroParticiones
         self.tamParticion = tamParticion
-        self.particiones = {}
-        self.particiones = self.creaParticiones(dataset)
+        self.particiones = []
