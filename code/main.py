@@ -9,18 +9,18 @@ from EstrategiaParticionado import *
 from Clasificador import *
 import numpy as np
 from tabulate import tabulate
+import pprint
 
 
 # In[ ]:
 
 
 dataset = Datos("ConjuntosDatos/balloons.data")
-print(dataset.nominalAtributos, "\n", dataset.tipoAtributos)
-# estrategiaS = ValidacionSimple()
-# print("Estrategia Validacion Simple:")
-# clas = ClasificadorNaiveBayes()
+estrategiaS = ValidacionSimple()
+print("Estrategia Validacion Simple:")
+clas = ClasificadorNaiveBayes()
 
-# print(Clasificador.ClasificadorNaiveBayes().validacion(estrategiaS,dataset,clas))
+pprint.pprint(clas.roc(estrategiaS,dataset,clas))
 
 # estrategiaS.creaParticiones(dataset)
 # for i in estrategiaS.particiones:
