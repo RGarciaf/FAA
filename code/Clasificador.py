@@ -1,6 +1,7 @@
 from abc import ABCMeta,abstractmethod
 import numpy as np
 from scipy.stats import norm
+import pprint
 #from tabulate import tabulate
 
 class Clasificador(object):
@@ -56,6 +57,10 @@ class Clasificador(object):
     #     # y obtenemos el error en la particion de test i
     #     # - Para validacion simple (hold-out): entrenamos el clasificador con la particion de train
     #     # y obtenemos el error en la particion test
+
+    @abstractmethod
+    def roc(self,particionado,dataset,clasificador):
+        pass
 
 
 
@@ -155,33 +160,46 @@ class ClasificadorNaiveBayes(Clasificador):
         self.clasificacion = clasificacion
         return clasificacion
 
-    #
-    # def clasifica(self, datostest,atributosDiscretos,diccionario):
-    #     columns = np.column_stack(datostest)
-    #     c, counts = np.unique(columns[-1], return_counts=True)
-    #     p_class = dict(zip(c.astype(int), counts))
-    #     ini_clas = dict.fromkeys(np.unique(columns[-1]).astype(int), 0)
-    #     clasifica = {}
-    #     cla = []
-    #     clas = columns[-1]
-    #     for index_col in range(len(columns[:-1])):
-    #         if atributosDiscretos[index_col] == "Nominal":
-    #             for value in self.probabilidades[index_col]:
-    #                 posterior, num, clasifica = [], [] , {}
-    #                 for i in self.probabilidades[index_col][value]:
-    #
-    #                     verosimilitud = self.probabilidades[index_col][value][i]
-    #                     prior = p_class[i] / len(columns[index_col])
-    #                     num.append(verosimilitud * prior)
-    #                 den = sum(num)
-    #                 if (den > 0):
-    #                     for x in num:
-    #                         posterior.append(round (x / den, 2))
-    #                     clasifica.update({posterior.index(max(posterior)):max(posterior)})
-    #                 cla.append(clasifica)
-    #
-    #         else:
-    #             norm.pdf(x,mean,std)
-    #     return cla
-    #
-    #     #print(clasificador)
+    def roc(self,particionado,dataset,clasificador):
+
+        particionado.creaParticiones(dataset)
+        clase_ini = {}
+        for clase in dataset.diccionarios["Class"].values():
+            clase_ini.update({clase:0.0000000001})
+
+        matriz = []
+        for particion in particionado.particiones:
+            clasificador.entrenamiento(dataset.extraeDatos(particion.indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
+            clasificacion = clasificador.clasifica(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
+
+            clases = np.column_stack(dataset.datos)[-1].astype(int)
+
+            falsos = clase_ini.copy()
+            verdaderos = clase_ini.copy()
+            roc = clase_ini.copy()
+            # for clase in dataset.diccionarios["Class"].values():
+            #     roc.update({clase:{}})
+
+            for clase, clase_pred in zip(clases, clasificacion):
+                if clase == list(clase_pred.keys())[0]:
+                    verdaderos[clase] += 1
+                else:
+                    falsos[clase] += 1
+            print ("verdaderos: ", verdaderos)
+            print ("falsos: ", falsos)
+            for clase1 in dataset.diccionarios["Class"].values():
+                fn = 0
+                fp = falsos[clase1]
+                tp = verdaderos[clase1]
+                tn = 0
+                for clase2 in dataset.diccionarios["Class"].values():
+                    if clase1 != clase2:
+                        fn += falsos[clase2]
+                        tn += verdaderos[clase2]
+                roc[clase1]={"TPR":round(tp / (fn + tp),3),
+                    "FNR":round(fn / (tp + fn),3),
+                    "FPR":round(fp / (fp + tn),3),
+                    "TNR":round(tn / (fp + tn),3) }
+            matriz.append(roc)
+            pprint.pprint(roc)
+        return matriz
