@@ -10,17 +10,18 @@ from Clasificador import *
 import numpy as np
 from tabulate import tabulate
 import pprint
+from Roc import *
 
 
 # In[ ]:
 
 
-dataset = Datos("ConjuntosDatos/balloons.data")
-estrategiaS = ValidacionSimple()
-print("Estrategia Validacion Simple:")
-clas = ClasificadorNaiveBayes()
+# dataset = Datos("ConjuntosDatos/balloons.data")
+# estrategiaS = ValidacionSimple()
+# print("Estrategia Validacion Simple:")
+# clas = ClasificadorNaiveBayes()
 
-pprint.pprint(clas.roc(estrategiaS,dataset,clas))
+print(Roc().roc)
 
 # estrategiaS.creaParticiones(dataset)
 # for i in estrategiaS.particiones:

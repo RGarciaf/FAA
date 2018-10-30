@@ -134,26 +134,31 @@ class ClasificadorNaiveBayes(Clasificador):
         clasificacion = []
         printer = []
         for filad in datostest:
+            print("\n\nIteracion ")
             prob = prob_ini.copy()
             for value, pattr in zip(filad,self.probabilidades):
                 for clas in prob_ini:
                     if atributosDiscretos[self.probabilidades.index(pattr)] == "Nominal":
-
+                        print("Nominal>",value,clas,pattr[value])
                         prob[clas] *= pattr[value][clas] * self.prior[clas]
                     else:
+                        print("Continuo>",value,clas, pattr[clas])
                         prob[clas] *= norm.pdf(value, pattr[clas]["media"], pattr[clas]["dp"])
 
             suma = np.sum(list(prob.values()))
-            max = 0
+            max = -1
             decision = ""
             for clas in diccionario["Class"]:
                 if suma == 0:
                     prob[diccionario["Class"][clas]] = 0
                 else:
                     prob[diccionario["Class"][clas]] = prob[diccionario["Class"][clas]]/suma
+                print(clas, decision, max, prob[diccionario["Class"][clas]])
                 if max <= prob[diccionario["Class"][clas]]:
                     max = prob[diccionario["Class"][clas]]
                     decision = clas
+                    print("if>",clas, decision)
+            print("decision, max>",decision, max)
             clasificacion.append({diccionario["Class"][decision]:round(max,3)})
             printer.append({decision:round(max,3)})
 
@@ -177,16 +182,12 @@ class ClasificadorNaiveBayes(Clasificador):
             falsos = clase_ini.copy()
             verdaderos = clase_ini.copy()
             roc = clase_ini.copy()
-            # for clase in dataset.diccionarios["Class"].values():
-            #     roc.update({clase:{}})
 
             for clase, clase_pred in zip(clases, clasificacion):
                 if clase == list(clase_pred.keys())[0]:
                     verdaderos[clase] += 1
                 else:
                     falsos[clase] += 1
-            print ("verdaderos: ", verdaderos)
-            print ("falsos: ", falsos)
             for clase1 in dataset.diccionarios["Class"].values():
                 fn = 0
                 fp = falsos[clase1]
@@ -201,5 +202,4 @@ class ClasificadorNaiveBayes(Clasificador):
                     "FPR":round(fp / (fp + tn),3),
                     "TNR":round(tn / (fp + tn),3) }
             matriz.append(roc)
-            pprint.pprint(roc)
         return matriz
