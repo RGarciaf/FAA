@@ -102,7 +102,7 @@ class Datos ( object ):
     def __init__ ( self, filename ):
 
         self.datos, self.diccionarios, self.nombreAtributos, self.tipoAtributos = Datos.transformDataToArray(filename)
-        self.nominal = self.attrToIndex()
+        self.nominalAtributos = self.attrToIndex()
        
         pass
 
