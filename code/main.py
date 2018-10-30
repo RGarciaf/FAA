@@ -16,12 +16,12 @@ from Roc import *
 # In[ ]:
 
 
-# dataset = Datos("ConjuntosDatos/balloons.data")
-# estrategiaS = ValidacionSimple()
+# dataset = Datos("ConjuntosDatos/german.data")
+estrategiaS = ValidacionSimple()
 # print("Estrategia Validacion Simple:")
-# clas = ClasificadorNaiveBayes()
-
-print(Roc().roc)
+clas = ClasificadorNaiveBayes()
+# print(clas.roc(estrategiaS,dataset,clas))
+pprint.pprint(Roc().roc)
 
 # estrategiaS.creaParticiones(dataset)
 # for i in estrategiaS.particiones:

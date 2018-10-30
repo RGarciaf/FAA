@@ -134,15 +134,15 @@ class ClasificadorNaiveBayes(Clasificador):
         clasificacion = []
         printer = []
         for filad in datostest:
-            print("\n\nIteracion ")
+            # print("\n\nIteracion ")
             prob = prob_ini.copy()
             for value, pattr in zip(filad,self.probabilidades):
                 for clas in prob_ini:
                     if atributosDiscretos[self.probabilidades.index(pattr)] == "Nominal":
-                        print("Nominal>",value,clas,pattr[value])
+                        # print("Nominal>",value,clas,pattr[value])
                         prob[clas] *= pattr[value][clas] * self.prior[clas]
                     else:
-                        print("Continuo>",value,clas, pattr[clas])
+                        # print("Continuo>",value,clas, pattr[clas])
                         prob[clas] *= norm.pdf(value, pattr[clas]["media"], pattr[clas]["dp"])
 
             suma = np.sum(list(prob.values()))
@@ -153,12 +153,12 @@ class ClasificadorNaiveBayes(Clasificador):
                     prob[diccionario["Class"][clas]] = 0
                 else:
                     prob[diccionario["Class"][clas]] = prob[diccionario["Class"][clas]]/suma
-                print(clas, decision, max, prob[diccionario["Class"][clas]])
+                # print(clas, decision, max, prob[diccionario["Class"][clas]])
                 if max <= prob[diccionario["Class"][clas]]:
                     max = prob[diccionario["Class"][clas]]
                     decision = clas
-                    print("if>",clas, decision)
-            print("decision, max>",decision, max)
+                    # print("if>",clas, decision)
+            # print("decision, max>",decision, max)
             clasificacion.append({diccionario["Class"][decision]:round(max,3)})
             printer.append({decision:round(max,3)})
 
