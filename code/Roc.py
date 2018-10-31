@@ -10,6 +10,7 @@ class Roc(object):
         self.simple = []
         self.cruzada = []
         self.bootstrap = []
+        self.medias = []
     
     def medias(roc):
         TPR = {}
@@ -34,12 +35,15 @@ class Roc(object):
         return medias
 
     def calcula_medias_roc(self):
+        medias = []
         print("\nValidacion simple")
-        Roc.medias(self.simple)
+        medias.append(Roc.medias(self.simple))
         print("\nValidacion cruzada")
-        Roc.medias(self.cruzada)
+        medias.append(Roc.medias(self.cruzada))
         print("\nValidacion Bootstrap")
-        Roc.medias(self.bootstrap)
+        medias.append(Roc.medias(self.bootstrap))
+        self.medias = medias
+        return medias
 
     def medias_roc(self):
         balloons = Datos("ConjuntosDatos/balloons.data")
