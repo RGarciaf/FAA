@@ -20,7 +20,9 @@ from Roc import *
 r = Roc()
 r.medias_roc()
 r.calcula_medias_roc()
-
+pprint.pprint(r.simple)
+# pprint.pprint(r.cruzada)
+# pprint.pprint(r.bootstrap)
 
 
 # estrategiaS.creaParticiones(dataset)
