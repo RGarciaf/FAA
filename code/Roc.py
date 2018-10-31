@@ -11,6 +11,36 @@ class Roc(object):
         self.cruzada = []
         self.bootstrap = []
     
+    def medias(roc):
+        TPR = {}
+        FPR = {}
+        medias = []
+        ini = {}
+        for clas in roc[0][0]:
+            ini.update({clas:0})
+
+        for archivo in roc:
+            TPR = ini.copy()
+            FPR = ini.copy()
+            for particion in archivo:
+                for clas in particion:
+                    TPR[clas] += particion[clas]["TPR"]
+                    FPR[clas] += particion[clas]["FPR"]
+            for clas in TPR:
+                TPR.update({clas:round(TPR[clas]/len(roc[0]),3)})
+                FPR.update({clas:round(FPR[clas]/len(roc[0]),3)})
+            medias.append({"TPR":TPR,"FPR":FPR})
+        pprint.pprint(medias)
+        return medias
+
+    def calcula_medias_roc(self):
+        print("\nValidacion simple")
+        Roc.medias(self.simple)
+        print("\nValidacion cruzada")
+        Roc.medias(self.cruzada)
+        print("\nValidacion Bootstrap")
+        Roc.medias(self.bootstrap)
+
     def medias_roc(self):
         balloons = Datos("ConjuntosDatos/balloons.data")
         german = Datos("ConjuntosDatos/german.data")
