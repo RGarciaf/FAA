@@ -200,6 +200,10 @@ class ClasificadorNaiveBayes(Clasificador):
                 roc[clase1]={"TPR":round(tp / (fn + tp),3),
                     "FNR":round(fn / (tp + fn),3),
                     "FPR":round(fp / (fp + tn),3),
-                    "TNR":round(tn / (fp + tn),3) }
+                    "TNR":round(tn / (fp + tn),3),
+                    "fn":round(fn,3),
+                    "fp":round(fp,3),
+                    "tp":round(tp,3),
+                    "tn":round(tn,3) }
             matriz.append(roc)
         return matriz
