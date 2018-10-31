@@ -12,16 +12,44 @@ from tabulate import tabulate
 import pprint
 from Roc import *
 
+def medias(roc):
+    TPR = {}
+    FPR = {}
+    medias = []
+    ini = {}
+    for clas in roc[0][0]:
+        ini.update({clas:0})
+
+    for archivo in roc:
+        TPR = ini.copy()
+        FPR = ini.copy()
+        for particion in archivo:
+            for clas in particion:
+                TPR[clas] += particion[clas]["TPR"]
+                FPR[clas] += particion[clas]["FPR"]
+        for clas in TPR:
+            TPR.update({clas:round(TPR[clas]/len(roc[0]),3)})
+            FPR.update({clas:round(FPR[clas]/len(roc[0]),3)})
+        medias.append({"TPR":TPR,"FPR":FPR})
+    pprint.pprint(medias)
+    return medias
 
 # In[ ]:
 
 
 # dataset = Datos("ConjuntosDatos/german.data")
-estrategiaS = ValidacionSimple()
+# estrategiaS = ValidacionSimple()
 # print("Estrategia Validacion Simple:")
-clas = ClasificadorNaiveBayes()
+# clasi = ClasificadorNaiveBayes()
 # print(clas.roc(estrategiaS,dataset,clas))
-pprint.pprint(Roc().roc)
+r = Roc()
+simple, cruzada, bootstrap = r.medias_roc()
+
+medias(simple)
+medias(cruzada)
+medias(bootstrap)
+
+
 
 # estrategiaS.creaParticiones(dataset)
 # for i in estrategiaS.particiones:
