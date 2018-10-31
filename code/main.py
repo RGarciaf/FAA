@@ -24,6 +24,9 @@ pprint.pprint(r.simple)
 # pprint.pprint(r.cruzada)
 # pprint.pprint(r.bootstrap)
 
+# for particion in r.simple[0]:
+#     for
+
 
 # estrategiaS.creaParticiones(dataset)
 # for i in estrategiaS.particiones:

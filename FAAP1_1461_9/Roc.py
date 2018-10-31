@@ -11,7 +11,7 @@ class Roc(object):
         self.cruzada = []
         self.bootstrap = []
         self.medias = []
-    
+
     def medias(roc):
         TPR = {}
         FPR = {}
@@ -28,8 +28,8 @@ class Roc(object):
                     TPR[clas] += particion[clas]["TPR"]
                     FPR[clas] += particion[clas]["FPR"]
             for clas in TPR:
-                TPR.update({clas:round(TPR[clas]/len(roc[0]),3)})
-                FPR.update({clas:round(FPR[clas]/len(roc[0]),3)})
+                TPR.update({clas:round(TPR[clas]/len(archivo),3)})
+                FPR.update({clas:round(FPR[clas]/len(archivo),3)})
             medias.append({"TPR":TPR,"FPR":FPR})
         pprint.pprint(medias)
         return medias
@@ -49,11 +49,11 @@ class Roc(object):
         balloons = Datos("ConjuntosDatos/balloons.data")
         german = Datos("ConjuntosDatos/german.data")
         tic_tac_toe = Datos("ConjuntosDatos/tic-tac-toe.data")
-        
+
         print("Validacion simple")
         simple = []
         estrategia = ValidacionSimple()
-        clas = ClasificadorNaiveBayes()        
+        clas = ClasificadorNaiveBayes()
         print("\tBalloons")
         simple.append(clas.roc(estrategia,balloons,clas))
 
@@ -89,18 +89,18 @@ class Roc(object):
         print("Validacion Bootstrap")
         bootstrap = []
         estrategia = ValidacionBootstrap()
-        clas = ClasificadorNaiveBayes()   
-        print("\tBalloons")     
+        clas = ClasificadorNaiveBayes()
+        print("\tBalloons")
         bootstrap.append(clas.roc(estrategia,balloons,clas))
 
         estrategia = ValidacionBootstrap()
-        clas = ClasificadorNaiveBayes()    
-        print("\tGerman")    
+        clas = ClasificadorNaiveBayes()
+        print("\tGerman")
         bootstrap.append(clas.roc(estrategia,german,clas))
 
         estrategia = ValidacionBootstrap()
-        clas = ClasificadorNaiveBayes()  
-        print("\tTic-tac-toe")      
+        clas = ClasificadorNaiveBayes()
+        print("\tTic-tac-toe")
         bootstrap.append(clas.roc(estrategia,tic_tac_toe,clas))
         self.bootstrap = bootstrap
 
