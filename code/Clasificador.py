@@ -62,6 +62,21 @@ class Clasificador(object):
     def roc(self,particionado,dataset,clasificador):
         pass
 
+##############################################################################
+
+class ClasificadorVecinosProximos(Clasificador):
+
+    def __init__(self):
+        pass
+
+    def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
+        pass
+        
+    def clasifica(self,datosTest,atributosDiscretos,diccionario):
+        pass
+
+
+
 
 
 ##############################################################################
