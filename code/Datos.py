@@ -103,7 +103,7 @@ class Datos ( object ):
 
         self.datos, self.diccionarios, self.nombreAtributos, self.tipoAtributos = Datos.transformDataToArray(filename)
         self.nominalAtributos = self.attrToIndex()
-       
+        self.mediaDesvAtributos = {}
         pass
 
     
@@ -124,3 +124,20 @@ class Datos ( object ):
             else:
                 nominal.append(0)
         return nominal
+    
+    # Diccionario, para cada clave (posicion de atributo), [media, std]
+    def calcularMediasDesv(self, datostrain):
+        columns = np.column_stack(datostrain)
+        meanStdAttrs = {}
+        for i in range(len(columns)):
+            meanStdAttrs[i] = [round(np.mean(columns[i]), 3), round(np.std(columns[i]), 3)]        
+        self.mediaDesvAtributos = meanStdAttrs
+    
+    def normalizarDatos(self, datos):
+        columns = np.column_stack(datos)
+        datosNorm = np.zeros((len(columns), len(datos)))
+        for i in range(len(columns)):
+            for j in range(len(datos)):
+                datosNorm[i][j] = round((columns[i][j] - self.mediaDesvAtributos[i][0]) / self.mediaDesvAtributos[i][1], 3)
+
+        return np.column_stack(datosNorm)
