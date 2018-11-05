@@ -66,15 +66,55 @@ class Clasificador(object):
 
 class ClasificadorVecinosProximos(Clasificador):
 
-    def __init__(self):
-        pass
+    def __init__(self, vecinos = 1):
+        self.mediaDesvAtributos = []
+        self.datosNormalizados = []
+        self.vecinos = vecinos
+        self.clasificacion = []
 
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
-        pass
+        self.calcularMediasDesv(datosTrain)
+        self.datosNormalizados = self.normalizarDatos(datosTrain)
         
     def clasifica(self,datosTest,atributosDiscretos,diccionario):
-        pass
+        datosTest_normalizados = self.normalizarDatos(datosTest)
 
+        sumas = []
+        for fila_test in datosTest_normalizados:
+            suma = 0
+            for value_test in fila_test:
+                suma += self.extraeVecinos(self.vecinos, value_test)
+            sumas.append(suma)
+        self.clasificacion = suma.sort()[:self.vecinos]
+        return self. clasificacion
+
+    def extraeVecinos(self, vecinos, datoTest):
+        train = np.array(self.datosNormalizados) 
+        train = ((train * train) - pow(datoTest, 2)) ** 0.5
+        train.sort()
+        return np.absolute(train)[0]
+
+
+    def calcularMediasDesv(self, datostrain):
+        columns = np.column_stack(datostrain)
+        meanStdAttrs = []
+        for i in range(len(columns)):
+            meanStdAttrs.append([round(np.mean(columns[i]), 3), round(np.std(columns[i]), 3)])
+        self.mediaDesvAtributos = meanStdAttrs
+    
+    def normalizarDatos(self, datos):
+        columns = np.column_stack(datos)
+        datosNorm = np.zeros((len(columns), len(datos)))
+
+        # for fila_datosN, col, mdv in zip(datosNorm, columns, self.mediaDesvAtributos):
+        #     for value_col, value_datosN in zip(col,fila_datosN):
+        #         value_datosN = round(value_col - mdv[0]/mdv[1], 3)
+    
+        for i in range(len(columns)):
+            for j in range(len(datos)):
+                datosNorm[i][j] = round((columns[i][j] - self.mediaDesvAtributos[i][0]) / self.mediaDesvAtributos[i][1], 3)
+
+        return  np.column_stack(datosNorm)
 
 
 
