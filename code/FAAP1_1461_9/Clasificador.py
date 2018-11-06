@@ -62,96 +62,6 @@ class Clasificador(object):
     def roc(self,particionado,dataset,clasificador):
         pass
 
-##############################################################################
-
-class ClasificadorVecinosProximos(Clasificador):
-
-    def __init__(self, vecinos = 1):
-        self.mediaDesvAtributos = []
-        self.datosNormalizados = []
-        self.vecinos = vecinos
-        self.clasificacion = []
-        self.datos = []
-
-    def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
-        self.calcularMediasDesv(datosTrain)
-        self.datosNormalizados = self.normalizarDatos(datosTrain)
-        self.datos = datosTrain
-        
-    def clasifica(self,datosTest,atributosDiscretos,diccionario):
-        datosTest_normalizados = self.normalizarDatos(datosTest)
-
-        sumas = []
-        for fila_test in datosTest_normalizados:                       
-            self.clasificacion.append(self.extraeClase(fila_test))
-        
-        return self.clasificacion
-            
-
-    def extraeProb(self,vecinos):
-        clas = {}
-        for vecino in vecinos:
-            clas[vecino[-1]] = 0
-
-        for vecino in vecinos:
-            clas[vecino[-1]] += 1
-
-        for value in clas:
-            clas[value] = round(clas[value]/len(vecinos), 3)
-        return clas
-
-
-    def extraeClase(self, fila_test):
-        datos_norm_numpy = self.datosNormalizados
-        datos_norm_numpy = pow(datos_norm_numpy, 2) 
-
-        fila_test_numpy = np.array(fila_test)
-        fila_test_numpy = pow(fila_test_numpy, 2)
-
-        resta =  np.absolute(datos_norm_numpy - fila_test_numpy) ** 0.5
-        array = []
-        for fila, i in zip(resta, range(len(resta))):
-            array.append(fila.tolist())
-            array[i].append(fila.sum())
-            array[i].append(self.datos[i][-1])
-            # np.append(resta[i],fila.sum())
-            # np.append(resta[i],self.datos[i][-1])
-            # print("array> ", array[i])
-            # print("fila> ", fila, fila.sum)
-            # print(resta[i])
-
-        vecinos = sorted(array, key = lambda x: x[-2])[:self.vecinos]
-
-        return self.extraeProb(vecinos)
-
-        
-
-
-
-    def calcularMediasDesv(self, datostrain):
-        columns = np.column_stack(datostrain)[:-1]
-        meanStdAttrs = []
-        for i in range(len(columns)):
-            meanStdAttrs.append([round(np.mean(columns[i]), 3), round(np.std(columns[i]), 3)])
-        self.mediaDesvAtributos = meanStdAttrs
-    
-    def normalizarDatos(self, datos):
-        columns = np.column_stack(datos)
-        # datosNorm = np.zeros((len(columns), len(datos)))
-        datosNorm = []
-        for col, mdv in zip(columns, self.mediaDesvAtributos):
-            fila = []
-            for value_col in col:
-                fila.append( round(value_col - mdv[0]/mdv[1], 3))
-            datosNorm.append(fila)
-
-        # for i in range(len(columns)):
-        #     for j in range(len(datos)):
-        #         datosNorm[i][j] = round((columns[i][j] - self.mediaDesvAtributos[i][0]) / self.mediaDesvAtributos[i][1], 3)
-
-        return  np.column_stack(np.array(datosNorm))
-
-
 
 
 ##############################################################################
@@ -224,15 +134,15 @@ class ClasificadorNaiveBayes(Clasificador):
         clasificacion = []
         printer = []
         for filad in datostest:
-            # print("\n\nIteracion ")
+            # #print("\n\nIteracion ")
             prob = prob_ini.copy()
             for value, pattr in zip(filad,self.probabilidades):
                 for clas in prob_ini:
                     if atributosDiscretos[self.probabilidades.index(pattr)] == "Nominal":
-                        # print("Nominal>",value,clas,pattr[value])
+                        # #print("Nominal>",value,clas,pattr[value])
                         prob[clas] *= pattr[value][clas] * self.prior[clas]
                     else:
-                        # print("Continuo>",value,clas, pattr[clas])
+                        # #print("Continuo>",value,clas, pattr[clas])
                         prob[clas] *= norm.pdf(value, pattr[clas]["media"], pattr[clas]["dp"])
 
             suma = np.sum(list(prob.values()))
@@ -243,12 +153,12 @@ class ClasificadorNaiveBayes(Clasificador):
                     prob[diccionario["Class"][clas]] = 0
                 else:
                     prob[diccionario["Class"][clas]] = prob[diccionario["Class"][clas]]/suma
-                # print(clas, decision, max, prob[diccionario["Class"][clas]])
+                # #print(clas, decision, max, prob[diccionario["Class"][clas]])
                 if max <= prob[diccionario["Class"][clas]]:
                     max = prob[diccionario["Class"][clas]]
                     decision = clas
-                    # print("if>",clas, decision)
-            # print("decision, max>",decision, max)
+                    # #print("if>",clas, decision)
+            # #print("decision, max>",decision, max)
             clasificacion.append({diccionario["Class"][decision]:round(max,3)})
             printer.append({decision:round(max,3)})
 

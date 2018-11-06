@@ -12,15 +12,26 @@ from tabulate import tabulate
 import pprint
 from Roc import *
 
+
+
+
+dataset = Datos("ConjuntosDatos/german.data")
+knn = ClasificadorVecinosProximos(5)
+knn.entrenamiento(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios)
+pprint.pprint(knn.clasifica(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios ))
+
+
+
+
 # dataset = Datos("ConjuntosDatos/german.data")
 # estrategiaS = ValidacionSimple()
 # print("Estrategia Validacion Simple:")
 # clasi = ClasificadorNaiveBayes()
 # print(clas.roc(estrategiaS,dataset,clas))
-r = Roc()
-r.medias_roc()
-r.calcula_medias_roc()
-pprint.pprint(r.simple)
+# r = Roc()
+# r.medias_roc()
+# r.calcula_medias_roc()
+# pprint.pprint(r.simple)
 # pprint.pprint(r.cruzada)
 # pprint.pprint(r.bootstrap)
 
