@@ -64,6 +64,17 @@ class Clasificador(object):
 
 ##############################################################################
 
+class ClasificadorRegresionLogistica(Clasificador):
+
+    def __init__(self, vecinos = 1):
+        pass
+    def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
+        pass
+    def clasifica(self,datosTest,atributosDiscretos,diccionario):
+        pass
+
+##############################################################################
+
 class ClasificadorVecinosProximos(Clasificador):
 
     def __init__(self, vecinos = 1):
@@ -77,16 +88,16 @@ class ClasificadorVecinosProximos(Clasificador):
         self.calcularMediasDesv(datosTrain)
         self.datosNormalizados = self.normalizarDatos(datosTrain)
         self.datos = datosTrain
-        
+
     def clasifica(self,datosTest,atributosDiscretos,diccionario):
         datosTest_normalizados = self.normalizarDatos(datosTest)
 
         sumas = []
-        for fila_test in datosTest_normalizados:                       
+        for fila_test in datosTest_normalizados:
             self.clasificacion.append(self.extraeClase(fila_test))
-        
+
         return self.clasificacion
-            
+
 
     def extraeProb(self,vecinos):
         clas = {}
@@ -103,16 +114,17 @@ class ClasificadorVecinosProximos(Clasificador):
 
     def extraeClase(self, fila_test):
         datos_norm_numpy = self.datosNormalizados
-        datos_norm_numpy = pow(datos_norm_numpy, 2) 
+        # datos_norm_numpy = pow(datos_norm_numpy, 2)
 
         fila_test_numpy = np.array(fila_test)
-        fila_test_numpy = pow(fila_test_numpy, 2)
+        # fila_test_numpy = pow(fila_test_numpy, 2)
 
-        resta =  np.absolute(datos_norm_numpy - fila_test_numpy) ** 0.5
+        resta =  np.absolute(datos_norm_numpy - fila_test_numpy) ** 2
         array = []
         for fila, i in zip(resta, range(len(resta))):
             array.append(fila.tolist())
-            array[i].append(fila.sum())
+            suma = fila.sum() ** 0.5
+            array[i].append(suma)
             array[i].append(self.datos[i][-1])
             # np.append(resta[i],fila.sum())
             # np.append(resta[i],self.datos[i][-1])
@@ -124,7 +136,7 @@ class ClasificadorVecinosProximos(Clasificador):
 
         return self.extraeProb(vecinos)
 
-        
+
 
 
 
@@ -134,7 +146,7 @@ class ClasificadorVecinosProximos(Clasificador):
         for i in range(len(columns)):
             meanStdAttrs.append([round(np.mean(columns[i]), 3), round(np.std(columns[i]), 3)])
         self.mediaDesvAtributos = meanStdAttrs
-    
+
     def normalizarDatos(self, datos):
         columns = np.column_stack(datos)
         # datosNorm = np.zeros((len(columns), len(datos)))
