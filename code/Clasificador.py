@@ -34,7 +34,7 @@ class Clasificador(object):
         clases = np.column_stack(datos)[-1]
         error = 0
         for clase, clase_pred in zip(clases, pred):
-            if clase != list(clase_pred.keys())[0]:
+            if clase != clase_pred:
                 error += 1
 
         error = error/len(datos)
@@ -66,16 +66,34 @@ class Clasificador(object):
 
 class ClasificadorRegresionLogistica(Clasificador):
 
-    def __init__(self, vecinos = 1):
+    def __init__(self):
+        self.w = []
         pass
+
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
-        pass
+        w = np.ones(len(atributosDiscretos))
+        for vector in datosTrain:
+            sigmoide = 1/np.exp(np.sum(w * vector))
+            w = w - (sigmoide - vector[-1]) * vector
+        self.w = w
+
     def clasifica(self,datosTest,atributosDiscretos,diccionario):
-        pass
+        w = self.w
+        clasificacion = []
+        for vector in datosTest:
+            sigmoide = 1/np.exp(np.sum(w *vector))
+            #clasifica como clase 0 si sigmoide <= 0.50000000000000005
+            clasificacion.append(round(sigmoide))
+        self.clasificacion = clasificacion
+        return clasificacion
 
 ##############################################################################
 
 class ClasificadorVecinosProximos(Clasificador):
+    """
+        Para calcular los errores hay que pasar al metodo error
+        una lista de las keys del diccionario que contiene la prediccion
+    """
 
     def __init__(self, vecinos = 1):
         self.mediaDesvAtributos = []
@@ -93,10 +111,19 @@ class ClasificadorVecinosProximos(Clasificador):
         datosTest_normalizados = self.normalizarDatos(datosTest)
 
         sumas = []
+        classify = []
         for fila_test in datosTest_normalizados:
-            self.clasificacion.append(self.extraeClase(fila_test))
+            clase = self.extraeClase(fila_test)
+            self.clasificacion.append(clase)
+            max = -1
+            decision = ""
+            for c in clase:
+                if max <= clase[c]:
+                    decision = c
+                    max = clase[c]
+            classify.append(decision)
 
-        return self.clasificacion
+        return classify
 
 
     def extraeProb(self,vecinos):
@@ -169,6 +196,10 @@ class ClasificadorVecinosProximos(Clasificador):
 ##############################################################################
 
 class ClasificadorNaiveBayes(Clasificador):
+    """
+        Para calcular los errores hay que pasar al metodo error
+        una lista de las keys del diccionario que contiene la prediccion
+    """
 
     def __init__(self, laplace = False):
         self.probabilidades = []
@@ -235,6 +266,7 @@ class ClasificadorNaiveBayes(Clasificador):
 
         clasificacion = []
         printer = []
+        ret = []
         for filad in datostest:
             # print("\n\nIteracion ")
             prob = prob_ini.copy()
@@ -263,9 +295,10 @@ class ClasificadorNaiveBayes(Clasificador):
             # print("decision, max>",decision, max)
             clasificacion.append({diccionario["Class"][decision]:round(max,3)})
             printer.append({decision:round(max,3)})
+            ret.append(diccionario["Class"][decision])
 
         self.clasificacion = clasificacion
-        return clasificacion
+        return ret
 
     def roc(self,particionado,dataset,clasificador):
 
@@ -277,7 +310,8 @@ class ClasificadorNaiveBayes(Clasificador):
         matriz = []
         for particion in particionado.particiones:
             clasificador.entrenamiento(dataset.extraeDatos(particion.indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
-            clasificacion = clasificador.clasifica(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
+            clasificador.clasifica(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
+            clasificacion = clasificador.clasificacion
 
             clases = np.column_stack(dataset.datos)[-1].astype(int)
 

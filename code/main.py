@@ -15,11 +15,25 @@ from Roc import *
 
 
 
-dataset = Datos("ConjuntosDatos/german.data")
-knn = ClasificadorVecinosProximos(5)
-knn.entrenamiento(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios)
-pprint.pprint(knn.clasifica(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios ))
+# dataset = Datos("ConjuntosDatos/balloons.data")
+# reglog = ClasificadorRegresionLogistica()
+# reglog.entrenamiento(dataset.datos[:10],dataset.nominalAtributos,dataset.diccionarios)
+# pprint.pprint(reglog.clasifica(dataset.datos[10:],dataset.nominalAtributos,dataset.diccionarios ))
 
+dataset = Datos("ConjuntosDatos/balloons.data")
+reglog = ClasificadorRegresionLogistica()
+pprint.pprint(reglog.validacion(ValidacionSimple(),dataset,reglog))
+
+knn = ClasificadorVecinosProximos(5)
+pprint.pprint(knn.validacion(ValidacionSimple(),dataset,knn))
+
+clas = ClasificadorNaiveBayes()
+pprint.pprint(clas.validacion(ValidacionSimple(),dataset,clas))
+
+# dataset = Datos("ConjuntosDatos/german.data")
+# knn = ClasificadorNaiveBayes()
+# knn.entrenamiento(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios)
+# pprint.pprint(knn.clasifica(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios ))
 
 
 
