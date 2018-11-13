@@ -1,8 +1,8 @@
 from abc import ABCMeta,abstractmethod
 import numpy as np
 from scipy.stats import norm
+import scipy
 import pprint
-#from tabulate import tabulate
 
 class Clasificador(object):
 
@@ -28,7 +28,6 @@ class Clasificador(object):
 
 
     # Obtiene el numero de aciertos y errores para calcular la tasa de fallo
-    # TODO: implementar
     def error(self,datos,pred):
     #     # Aqui se compara la prediccion (pred) con las clases reales y se calcula el error
         clases = np.column_stack(datos)[-1]
@@ -52,11 +51,6 @@ class Clasificador(object):
             clasificacion = clasificador.clasifica(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
             errores.append(clasificador.error(dataset.extraeDatos(particion.indicesTest), clasificacion))
         return errores
-    #     # Creamos las particiones siguiendo la estrategia llamando a particionado.creaParticiones
-    #     # - Para validacion cruzada: en el bucle hasta nv entrenamos el clasificador con la particion de train i
-    #     # y obtenemos el error en la particion de test i
-    #     # - Para validacion simple (hold-out): entrenamos el clasificador con la particion de train
-    #     # y obtenemos el error en la particion test
 
     @abstractmethod
     def roc(self,particionado,dataset,clasificador):
@@ -73,7 +67,8 @@ class ClasificadorRegresionLogistica(Clasificador):
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
         w = np.ones(len(atributosDiscretos))
         for vector in datosTrain:
-            sigmoide = 1/np.exp(np.sum(w * vector))
+            mult = w*vector            
+            sigmoide = scipy.special.expit(np.sum(mult))
             w = w - (sigmoide - vector[-1]) * vector
         self.w = w
 
@@ -81,11 +76,11 @@ class ClasificadorRegresionLogistica(Clasificador):
         w = self.w
         clasificacion = []
         for vector in datosTest:
-            sigmoide = 1/np.exp(np.sum(w *vector))
-            #clasifica como clase 0 si sigmoide <= 0.50000000000000005
-            clasificacion.append(round(sigmoide))
+            mult = w*vector  
+            sigmoide = scipy.special.expit(np.sum(mult))
+            clasificacion.append(round(sigmoide))   #clasifica como clase 0 si sigmoide <= 0.50000000000000005
         self.clasificacion = clasificacion
-        return clasificacion
+        return np.array(clasificacion)
 
 ##############################################################################
 
@@ -107,8 +102,9 @@ class ClasificadorVecinosProximos(Clasificador):
         self.datosNormalizados = self.normalizarDatos(datosTrain)
         self.datos = datosTrain
 
-    def clasifica(self,datosTest,atributosDiscretos,diccionario):
-        datosTest_normalizados = self.normalizarDatos(datosTest)
+    def clasifica(self,datosTest,atributosDiscretos,diccionario, normaliza=True):
+        
+        datosTest_normalizados = self.normalizarDatos(datosTest) if normaliza else datosTest
 
         sumas = []
         classify = []
@@ -123,8 +119,24 @@ class ClasificadorVecinosProximos(Clasificador):
                     max = clase[c]
             classify.append(decision)
 
-        return classify
+        return np.array(classify)
 
+    def extraeClase(self, fila_test):
+        datos_norm_numpy = self.datosNormalizados
+
+        fila_test_numpy = np.array(fila_test)
+
+        resta =  np.absolute(datos_norm_numpy - fila_test_numpy) ** 2
+        array = []
+        for fila, i in zip(resta, range(len(resta))):
+            array.append(fila.tolist())
+            suma = fila.sum() ** 0.5
+            array[i].append(suma)
+            array[i].append(self.datos[i][-1])
+
+        vecinos = sorted(array, key = lambda x: x[-2])[:self.vecinos]
+
+        return self.extraeProb(vecinos)
 
     def extraeProb(self,vecinos):
         clas = {}
@@ -139,33 +151,6 @@ class ClasificadorVecinosProximos(Clasificador):
         return clas
 
 
-    def extraeClase(self, fila_test):
-        datos_norm_numpy = self.datosNormalizados
-        # datos_norm_numpy = pow(datos_norm_numpy, 2)
-
-        fila_test_numpy = np.array(fila_test)
-        # fila_test_numpy = pow(fila_test_numpy, 2)
-
-        resta =  np.absolute(datos_norm_numpy - fila_test_numpy) ** 2
-        array = []
-        for fila, i in zip(resta, range(len(resta))):
-            array.append(fila.tolist())
-            suma = fila.sum() ** 0.5
-            array[i].append(suma)
-            array[i].append(self.datos[i][-1])
-            # np.append(resta[i],fila.sum())
-            # np.append(resta[i],self.datos[i][-1])
-            # print("array> ", array[i])
-            # print("fila> ", fila, fila.sum)
-            # print(resta[i])
-
-        vecinos = sorted(array, key = lambda x: x[-2])[:self.vecinos]
-
-        return self.extraeProb(vecinos)
-
-
-
-
 
     def calcularMediasDesv(self, datostrain):
         columns = np.column_stack(datostrain)[:-1]
@@ -176,7 +161,7 @@ class ClasificadorVecinosProximos(Clasificador):
 
     def normalizarDatos(self, datos):
         columns = np.column_stack(datos)
-        # datosNorm = np.zeros((len(columns), len(datos)))
+
         datosNorm = []
         for col, mdv in zip(columns, self.mediaDesvAtributos):
             fila = []
@@ -184,14 +169,7 @@ class ClasificadorVecinosProximos(Clasificador):
                 fila.append( round(value_col - mdv[0]/mdv[1], 3))
             datosNorm.append(fila)
 
-        # for i in range(len(columns)):
-        #     for j in range(len(datos)):
-        #         datosNorm[i][j] = round((columns[i][j] - self.mediaDesvAtributos[i][0]) / self.mediaDesvAtributos[i][1], 3)
-
         return  np.column_stack(np.array(datosNorm))
-
-
-
 
 ##############################################################################
 
@@ -206,8 +184,6 @@ class ClasificadorNaiveBayes(Clasificador):
         self.clasificacion = []
         self.laplace = laplace
         self.prior = {}
-
-  # TODO: implementar
 
     def entrenamiento(self,datostrain,atributosDiscretos,diccionario):
         columns = np.column_stack(datostrain)
@@ -268,7 +244,6 @@ class ClasificadorNaiveBayes(Clasificador):
         printer = []
         ret = []
         for filad in datostest:
-            # print("\n\nIteracion ")
             prob = prob_ini.copy()
             for value, pattr in zip(filad,self.probabilidades):
                 for clas in prob_ini:
@@ -298,7 +273,7 @@ class ClasificadorNaiveBayes(Clasificador):
             ret.append(diccionario["Class"][decision])
 
         self.clasificacion = clasificacion
-        return ret
+        return np.array(ret)
 
     def roc(self,particionado,dataset,clasificador):
 

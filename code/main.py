@@ -20,14 +20,33 @@ from Roc import *
 # reglog.entrenamiento(dataset.datos[:10],dataset.nominalAtributos,dataset.diccionarios)
 # pprint.pprint(reglog.clasifica(dataset.datos[10:],dataset.nominalAtributos,dataset.diccionarios ))
 
+print("\nBalloons:")
 dataset = Datos("ConjuntosDatos/balloons.data")
 reglog = ClasificadorRegresionLogistica()
+print("\nRegresion Logistica")
 pprint.pprint(reglog.validacion(ValidacionSimple(),dataset,reglog))
 
 knn = ClasificadorVecinosProximos(5)
+print("\nVecinos Proximos")
 pprint.pprint(knn.validacion(ValidacionSimple(),dataset,knn))
 
 clas = ClasificadorNaiveBayes()
+print("\nNaive Bayes")
+pprint.pprint(clas.validacion(ValidacionSimple(),dataset,clas))
+
+
+print("\n\nGerman:")
+dataset = Datos("ConjuntosDatos/german.data")
+reglog = ClasificadorRegresionLogistica()
+print("\nRegresion Logistica")
+pprint.pprint(reglog.validacion(ValidacionSimple(),dataset,reglog))
+
+knn = ClasificadorVecinosProximos(5)
+print("\nVecinos Proximos")
+pprint.pprint(knn.validacion(ValidacionSimple(),dataset,knn))
+
+clas = ClasificadorNaiveBayes()
+print("\nNaive Bayes")
 pprint.pprint(clas.validacion(ValidacionSimple(),dataset,clas))
 
 # dataset = Datos("ConjuntosDatos/german.data")
