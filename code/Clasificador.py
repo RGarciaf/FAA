@@ -60,10 +60,10 @@ class Clasificador(object):
 
 class ClasificadorRegresionLogistica(Clasificador):
 
-    def __init__(self, nepocas = 3):
+    def __init__(self, nepocas = 3, aprend = 1):
         self.w = []
         self.nepocas = nepocas
-        pass
+        self.aprend = aprend
 
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
         # w = np.ones(len(atributosDiscretos))
@@ -73,7 +73,7 @@ class ClasificadorRegresionLogistica(Clasificador):
                 vector = np.concatenate(([1],line[:-1]), axis=None)
                 mult = w*vector            
                 sigmoide = scipy.special.expit(np.sum(mult))
-                w = w - (sigmoide - line[-1]) * vector
+                w = w - (self.aprend * (sigmoide - line[-1])) * vector
         self.w = w
 
     def clasifica(self,datosTest,atributosDiscretos,diccionario):
