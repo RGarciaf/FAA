@@ -102,21 +102,23 @@ class ClasificadorVecinosProximos(Clasificador):
         una lista de las keys del diccionario que contiene la prediccion
     """
 
-    def __init__(self, vecinos = 1):
+    def __init__(self, vecinos = 1, normaliza=True):
         self.mediaDesvAtributos = []
         self.datosNormalizados = []
         self.vecinos = vecinos
         self.clasificacion = []
         self.datos = []
+        self.normaliza = normaliza
 
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
+        if self.normaliza:
+            return
         self.calcularMediasDesv(datosTrain)
         self.datosNormalizados = self.normalizarDatos(datosTrain)
         self.datos = datosTrain
 
-    def clasifica(self,datosTest,atributosDiscretos,diccionario, normaliza=True):
-        
-        datosTest_normalizados = self.normalizarDatos(datosTest) if normaliza else datosTest
+    def clasifica(self,datosTest,atributosDiscretos,diccionario):        
+        datosTest_normalizados = self.normalizarDatos(datosTest) if self.normaliza else datosTest
 
         sumas = []
         classify = []
