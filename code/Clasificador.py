@@ -60,16 +60,20 @@ class Clasificador(object):
 
 class ClasificadorRegresionLogistica(Clasificador):
 
-    def __init__(self):
+    def __init__(self, nepocas = 3, aprend = 1):
         self.w = []
-        pass
+        self.nepocas = nepocas
+        self.aprend = aprend
 
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
-        w = np.ones(len(atributosDiscretos))
-        for vector in datosTrain:
-            mult = w*vector            
-            sigmoide = scipy.special.expit(np.sum(mult))
-            w = w - (sigmoide - vector[-1]) * vector
+        # w = np.ones(len(atributosDiscretos))
+        w = self.calcula_w_inicial(datosTrain, atributosDiscretos)
+        for _ in range(self.nepocas):
+            for line in datosTrain:                
+                vector = np.concatenate(([1],line[:-1]), axis=None)
+                mult = w*vector            
+                sigmoide = scipy.special.expit(np.sum(mult))
+                w = w - (self.aprend * (sigmoide - line[-1])) * vector
         self.w = w
 
     def clasifica(self,datosTest,atributosDiscretos,diccionario):
@@ -81,6 +85,14 @@ class ClasificadorRegresionLogistica(Clasificador):
             clasificacion.append(round(sigmoide))   #clasifica como clase 0 si sigmoide <= 0.50000000000000005
         self.clasificacion = clasificacion
         return np.array(clasificacion)
+    
+    def calcula_w_inicial(self,datosTrain, atributosDiscretos):
+        columns = np.column_stack(datosTrain)
+        w = [0]
+        for col in columns[:-1]:
+            w.append(np.mean(col))
+        w = np.absolute(np.array(w)) % (np.amax(w) - np.amin(w[1:]) + 0.001) / (np.amax(w) - np.amin(w[1:]) + 0.001) - 0.5
+        return w
 
 ##############################################################################
 
@@ -90,21 +102,23 @@ class ClasificadorVecinosProximos(Clasificador):
         una lista de las keys del diccionario que contiene la prediccion
     """
 
-    def __init__(self, vecinos = 1):
+    def __init__(self, vecinos = 1, normaliza=True):
         self.mediaDesvAtributos = []
         self.datosNormalizados = []
         self.vecinos = vecinos
         self.clasificacion = []
         self.datos = []
+        self.normaliza = normaliza
 
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
+        if self.normaliza:
+            return
         self.calcularMediasDesv(datosTrain)
         self.datosNormalizados = self.normalizarDatos(datosTrain)
         self.datos = datosTrain
 
-    def clasifica(self,datosTest,atributosDiscretos,diccionario, normaliza=True):
-        
-        datosTest_normalizados = self.normalizarDatos(datosTest) if normaliza else datosTest
+    def clasifica(self,datosTest,atributosDiscretos,diccionario):        
+        datosTest_normalizados = self.normalizarDatos(datosTest) if self.normaliza else datosTest
 
         sumas = []
         classify = []
