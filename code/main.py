@@ -14,45 +14,49 @@ from Roc import *
 
 
 
+nb = ClasificadorNaiveBayes(True)
+knn = ClasificadorVecinosProximos(7)
+reglog = ClasificadorRegresionLogistica(20)
+for i in range(4):
+    file = "example" + str(i+1) + ".data"
+    dataset = Datos("ConjuntosDatos/" + file)
+
+    print("\n\n" + file + ": ")
+    # pprint.pprint(dataset.diccionarios)    
+    print("\nRegresion Logistica")
+    pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,reglog)))
+
+    print("\nNaive Bayes")
+    pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,nb)))
+
+    print("\nVecinos Proximos")
+    pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,knn)))
+
+file = "wdbc.data"
+dataset = Datos("ConjuntosDatos/" + file)
+
+print("\n\n" + file + ": ")
+# pprint.pprint(dataset.diccionarios)    
+print("\nRegresion Logistica")
+pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,reglog)))
+
+print("\nNaive Bayes")
+pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,nb)))
+
+print("\nVecinos Proximos")
+pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,knn)))
+
 
 # dataset = Datos("ConjuntosDatos/balloons.data")
 # reglog = ClasificadorRegresionLogistica()
 # reglog.entrenamiento(dataset.datos[:10],dataset.nominalAtributos,dataset.diccionarios)
 # pprint.pprint(reglog.clasifica(dataset.datos[10:],dataset.nominalAtributos,dataset.diccionarios ))
 
-print("\nBalloons:")
-dataset = Datos("ConjuntosDatos/balloons.data")
-reglog = ClasificadorRegresionLogistica()
-print("\nRegresion Logistica")
-pprint.pprint(reglog.validacion(ValidacionSimple(),dataset,reglog))
-
-knn = ClasificadorVecinosProximos(5)
-print("\nVecinos Proximos")
-pprint.pprint(knn.validacion(ValidacionSimple(),dataset,knn))
-
-clas = ClasificadorNaiveBayes()
-print("\nNaive Bayes")
-pprint.pprint(clas.validacion(ValidacionSimple(),dataset,clas))
-
-
-print("\n\nGerman:")
-dataset = Datos("ConjuntosDatos/german.data")
-reglog = ClasificadorRegresionLogistica()
-print("\nRegresion Logistica")
-pprint.pprint(reglog.validacion(ValidacionSimple(),dataset,reglog))
-
-knn = ClasificadorVecinosProximos(5)
-print("\nVecinos Proximos")
-pprint.pprint(knn.validacion(ValidacionSimple(),dataset,knn))
-
-clas = ClasificadorNaiveBayes()
-print("\nNaive Bayes")
-pprint.pprint(clas.validacion(ValidacionSimple(),dataset,clas))
-
-# dataset = Datos("ConjuntosDatos/german.data")
-# knn = ClasificadorNaiveBayes()
-# knn.entrenamiento(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios)
-# pprint.pprint(knn.clasifica(dataset.datos[:500],dataset.nominalAtributos,dataset.diccionarios ))
+# print("\nBalloons:")
+# dataset = Datos("ConjuntosDatos/balloons.data")
+# reglog = ClasificadorRegresionLogistica(5)
+# print("\nRegresion Logistica")
+# pprint.pprint(reglog.validacion(ValidacionSimple(),dataset,reglog))
 
 
 
