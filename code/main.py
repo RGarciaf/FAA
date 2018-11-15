@@ -13,38 +13,44 @@ import pprint
 from Roc import *
 
 
+dataset = Datos("ConjuntosDatos/german.data")
 
-nb = ClasificadorNaiveBayes(True)
-knn = ClasificadorVecinosProximos(7)
-reglog = ClasificadorRegresionLogistica(20)
-for i in range(4):
-    file = "example" + str(i+1) + ".data"
-    dataset = Datos("ConjuntosDatos/" + file)
+# nb = ClasificadorNaiveBayes(True)
+knn = ClasificadorVecinosProximos(9, True,  )
+print(knn.weight)
+pprint.pprint(np.mean(knn.validacion(ValidacionCruzada(),dataset,knn)))
 
-    print("\n\n" + file + ": ")
+
+
+# reglog = ClasificadorRegresionLogistica(20)
+# for i in range(4):
+#     file = "example" + str(i+1) + ".data"
+#     dataset = Datos("ConjuntosDatos/" + file)
+
+#     print("\n\n" + file + ": ")
     # pprint.pprint(dataset.diccionarios)    
-    print("\nRegresion Logistica")
-    pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,reglog)))
+    # print("\nRegresion Logistica")
+    # pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,reglog)))
 
-    print("\nNaive Bayes")
-    pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,nb)))
+    # print("\nNaive Bayes")
+    # pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,nb)))
 
-    print("\nVecinos Proximos")
-    pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,knn)))
+    # print("\nVecinos Proximos")
+    # pprint.pprint(np.mean(knn.validacion(ValidacionCruzada(),dataset,knn)))
 
-file = "wdbc.data"
-dataset = Datos("ConjuntosDatos/" + file)
+# file = "wdbc.data"
+# dataset = Datos("ConjuntosDatos/" + file)
 
-print("\n\n" + file + ": ")
+# print("\n\n" + file + ": ")
 # pprint.pprint(dataset.diccionarios)    
-print("\nRegresion Logistica")
-pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,reglog)))
+# print("\nRegresion Logistica")
+# pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,reglog)))
 
-print("\nNaive Bayes")
-pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,nb)))
+# print("\nNaive Bayes")
+# pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,nb)))
 
-print("\nVecinos Proximos")
-pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,knn)))
+# print("\nVecinos Proximos")
+# pprint.pprint(np.mean(reglog.validacion(ValidacionCruzada(),dataset,knn)))
 
 
 # dataset = Datos("ConjuntosDatos/balloons.data")

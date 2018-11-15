@@ -102,23 +102,26 @@ class ClasificadorVecinosProximos(Clasificador):
         una lista de las keys del diccionario que contiene la prediccion
     """
 
-    def __init__(self, vecinos = 1, normaliza=True):
+    def __init__(self, vecinos = 1, normaliza=True, weight = "uniform"):
         self.mediaDesvAtributos = []
         self.datosNormalizados = []
         self.vecinos = vecinos
         self.clasificacion = []
         self.datos = []
         self.normaliza = normaliza
+        self.weight = weight
 
     def entrenamiento(self,datosTrain,atributosDiscretos,diccionario):
-        if self.normaliza:
-            return
         self.calcularMediasDesv(datosTrain)
-        self.datosNormalizados = self.normalizarDatos(datosTrain)
-        self.datos = datosTrain
+        if self.normaliza:
+            self.datosNormalizados = self.normalizarDatos(datosTrain)
+            self.datos = datosTrain
+        else :
+            self.datosNormalizados = datosTrain
+            self.datos = datosTrain
 
     def clasifica(self,datosTest,atributosDiscretos,diccionario):        
-        datosTest_normalizados = self.normalizarDatos(datosTest) if self.normaliza else datosTest
+        datosTest_normalizados = self.normalizarDatos(datosTest) if self.normaliza else np.array(datosTest)
 
         sumas = []
         classify = []
@@ -132,14 +135,12 @@ class ClasificadorVecinosProximos(Clasificador):
                     decision = c
                     max = clase[c]
             classify.append(decision)
-
         return np.array(classify)
 
     def extraeClase(self, fila_test):
         datos_norm_numpy = self.datosNormalizados
 
         fila_test_numpy = np.array(fila_test)
-
         resta =  np.absolute(datos_norm_numpy - fila_test_numpy) ** 2
         array = []
         for fila, i in zip(resta, range(len(resta))):
@@ -147,19 +148,16 @@ class ClasificadorVecinosProximos(Clasificador):
             suma = fila.sum() ** 0.5
             array[i].append(suma)
             array[i].append(self.datos[i][-1])
-
+        
         vecinos = sorted(array, key = lambda x: x[-2])[:self.vecinos]
-
         return self.extraeProb(vecinos)
 
     def extraeProb(self,vecinos):
         clas = {}
         for vecino in vecinos:
             clas[vecino[-1]] = 0
-
         for vecino in vecinos:
-            clas[vecino[-1]] += 1
-
+            clas[vecino[-1]] += 1/vecino[-2] if self.weight == "distance" else 1
         for value in clas:
             clas[value] = round(clas[value]/len(vecinos), 3)
         return clas
