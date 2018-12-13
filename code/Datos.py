@@ -151,7 +151,7 @@ class Datos ( object ):
         #A = (Xmax – Xmin) / K 
         a = []
         for row in n:
-            a.append((np.amax(i) - np.amin(row))/k)
+            a.append((np.amax(row) - np.amin(row))/k)
         self.k = k
         self.a = a
         return k, a
@@ -159,12 +159,17 @@ class Datos ( object ):
     
     def convertirAIntervalos(self, datos):
         columns = np.column_stack(datos)
-        datosIntervalos = np.zeros(len(columns), len(datos))
+        datosIntervalos = np.zeros((len(columns)-1, len(datos))) #Dos parentesis, tiene que ser un shape
         mins = []
-        for row in columns:
+        for row in columns[:-1]: #Necesito los minimos de cada atributo
             mins.append(np.amin(row))
-        for i in range(len(columns)):
-            v_min = np.amin(columns[i])
-            for j in range(len(datos)):
-                datosIntervalos[i][j] = math.ceil((columns[i][j] - mins[j])/self.a[j])
-        return np.column_stack(datosIntervalos)
+            
+        for fila_inter, col, a, col_min in zip(datosIntervalos, columns[:-1], self.a, mins): #Itero sobre los datos correspondientes a las columnas
+            for i,(attr_inter, dato) in enumerate(zip(fila_inter, col)): #por cada valor de la fila, uso el minimo de ese atributo y el "a" de ese atributo
+                fila_inter[i] = math.ceil((dato - col_min)/a)
+        
+        # for i in range(len(columns)-1):
+        #     v_min = np.amin(columns[i])
+        #     for j in range(len(datos)):
+        #         datosIntervalos[i][j] = math.ceil((columns[i][j] - mins[j])/self.a[j])
+        return np.column_stack(datosIntervalos.tolist() + [datos[-1]])

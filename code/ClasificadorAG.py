@@ -1,4 +1,6 @@
 from abc import ABCMeta,abstractmethod
+from multipledispatch import dispatch
+import random
 import numpy as np
 from random import randint
 from scipy.stats import norm
@@ -57,7 +59,9 @@ class Clasificador(object):
     def roc(self,particionado,dataset,clasificador):
         pass
 
-class ClasificadorAG():
+
+
+class ClasificadorAG(Clasificador):
     
     def __init__(self, n_cromosomas, dataset, regla_entera = True):
         self.cromosomas = []
@@ -71,29 +75,37 @@ class ClasificadorAG():
             self.cromosomas.append(self.Cromosoma(dataset, regla_entera))
     
     def recombinar(self):
-        pass
+        poblacion = []
+        for cromosoma in self.cromosomas:
+            poblacion.append(cromosoma.recombinar(random.sample(self.cromosomas, 1)))
     
     def mutar(self):
-        pass
+        poblacion = []
+        for cromosoma in self.cromosomas:
+            poblacion.append(cromosoma.mutar()
     
     
-    class Cromosoma():
+    class Cromosoma:
         
-        def __init__(self, dataset, regla_entera):
-            n_attrs = len(dataset.nombreAtributos) - 1  #nº attrs menos la clase
-            rlen = randint(1,pow(dataset.k, n_attrs))
+        def __init__(self, dataset, regla_entera = True):
+            self.regla_entera = regla_entera
+            self.n_attrs = len(dataset.nombreAtributos) - 1  #nº attrs menos la clase
+            self.rlen = randint(1,pow(dataset.k, self.n_attrs))
+            
+            self.n_intervalos = dataset.k
             
             self.reglas = set()
+            
+            
+            self.fit = -1
+        def generarReglas(self,):
             for _ in range(rlen):
-                regla = self.crearRegla(dataset, regla_entera) 
+                regla = self.crearRegla(dataset, self.regla_entera) 
                 
                 while regla in self.reglas:
                     regla = self.crearRegla(dataset, regla_entera)
                     
                 self.reglas.add(regla)
-            
-            self.fit = -1
-            
         
         def crearRegla(self, dataset, regla_entera):
             if regla_entera:
@@ -106,15 +118,59 @@ class ClasificadorAG():
                 return regla
         
         def fitness(self, datos = None):
-            if self.fit == -1 or not datos:
-                pass
-            return self.fitness
+            if not datos:
+                return self.fit
+                
+            for fila in datos:
+                self.fit += self.compruebaReglas(fila)
+            self.fit /= len(datos)
+                
+            return self.fit
+            
+        def compruebaReglas(self, fila):
+            for regla in self.reglas:
+                if self.compruebaRegla(fila, regla) == 1:
+                    return 1
+            return 0;
         
-        def __sizeof__(self):
-            return self.fitness()
+        def compruebaRegla(self, fila, regla):
+            for dato_fila, dato_regla in zip(fila, regla):
+                if dato_regla != 0 and dato_regla != dato_fila:
+                    return 0
+                    
+            if fila[-1] == regla[-1]:
+                return 1
+            return 0
+        
+        def __lt__(self, other):
+            return self.fitness() < other.fitness()
             
         def recombinar(self, cromosoma):
-            pass
+            return self.recombina_reglas(cromosoma)
         
-        def mutar(self):
-            pass
+        def recombinar_regla(self, cromosoma):
+            new_cromosoma = 
+            for regla in self.reglas:
+                alea = tirarDado(len(regla)-1)
+                regla[:alea] + regla[alea:]
+        
+        def recombinar_reglas(self, cromosoma):
+            for regla in self.reglas:
+                alea = tirarDado(len(regla)-1)
+            return regla[:alea] + regla[alea:]
+        
+        def recombinar_cromosomas(self, cromosoma):
+            for regla in self.reglas:
+                alea = tirarDado(len(regla)-1)
+            return regla[:alea] + regla[alea:]
+        
+        def mutar(self, porcentaje = 4):
+            for regla in self.reglas:
+                if tirarDado(99) < porcentaje:
+                    for indice, intervalo in enumerate(regla[:-1]):
+                        if tirarDado(99) > porcentaje:
+                            regla[indice] = tirarDado(self.n_intervalos)
+        
+                            
+def tirarDado(caras, ini = 0):
+    return random.randint(ini,caras)
