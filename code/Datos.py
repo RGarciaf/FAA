@@ -164,9 +164,9 @@ class Datos ( object ):
         for row in columns[:-1]: #Necesito los minimos de cada atributo
             mins.append(np.amin(row))
             
-        for fila_inter, col, a, col_min in zip(datosIntervalos, columns[:-1], self.a, mins): #Itero sobre los datos correspondientes a las columnas
-            for i,(attr_inter, dato) in enumerate(zip(fila_inter, col)): #por cada valor de la fila, uso el minimo de ese atributo y el "a" de ese atributo
-                fila_inter[i] = math.ceil((dato - col_min)/a)
+        for i, (fila_inter, col, a, col_min) in enumerate(zip(datosIntervalos, columns[:-1], self.a, mins)): #Itero sobre los datos correspondientes a las columnas
+            for j,(attr_inter, dato) in enumerate(zip(fila_inter, col)): #por cada valor de la fila, uso el minimo de ese atributo y el "a" de ese atributo
+                fila_inter[i][j] = math.ceil((dato - col_min)/a)
         
         # for i in range(len(columns)-1):
         #     v_min = np.amin(columns[i])
