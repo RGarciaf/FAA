@@ -66,6 +66,7 @@ class ClasificadorAG(Clasificador):
     def __init__(self, n_cromosomas, dataset, n_generaciones, regla_entera = True):
         self.n_generaciones = n_generaciones
         self.cromosomas = []
+        self.datosIntervalizados = []
         self.n_cromosomas = n_cromosomas
         self.generarPoblacion(n_cromosomas, dataset, regla_entera)
         self.hulk = None
@@ -87,6 +88,8 @@ class ClasificadorAG(Clasificador):
         return sorted(self.cromosomas)
     
     def generarPoblacion(self, n_cromosomas, dataset, regla_entera):
+        a, k = dataset.crearIntervalos(dataset.datos)
+        self.datosIntervalizados = dataset.convertirAIntervalos(dataset.datos)
         for _ in range(n_cromosomas):
             self.cromosomas.append(self.Cromosoma(dataset, regla_entera))
     
@@ -124,7 +127,8 @@ class ClasificadorAG(Clasificador):
         def __init__(self, dataset, reglas = None, regla_entera = True):
             self.regla_entera = regla_entera
             self.n_attrs = len(dataset.nombreAtributos) - 1  #nº attrs menos la clase
-            self.rlen = randint(1, pow(dataset.k, self.n_attrs))
+            #self.rlen = randint(1, pow(dataset.k, self.n_attrs))
+            self.rlen = randint(2, 20)
             self.datos = dataset.datos
             self.n_intervalos = dataset.k
             
@@ -195,7 +199,7 @@ class ClasificadorAG(Clasificador):
             medio = round(len(self.reglas)/2)
             medio_other = round(len(cromosoma.reglas)/2)
             
-            return Cromosoma(self.dataset, reglas = self.reglas[:medio] + cromosoma.reglas[:medio_other], self.regla_entera )
+            return Cromosoma(self.dataset, reglas = self.reglas[:medio] + cromosoma.reglas[:medio_other], regla_entera = self.regla_entera )
         
         def mutar(self, porcentaje = 4):
             for regla in self.reglas:

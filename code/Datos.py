@@ -105,7 +105,8 @@ class Datos ( object ):
         self.datos, self.diccionarios, self.nombreAtributos, self.tipoAtributos = Datos.transformDataToArray(filename)
         self.nominalAtributos = self.attrToIndex()
         self.mediaDesvAtributos = {}
-        pass
+        self.k = None
+        self.a = None
 
     
         
@@ -146,11 +147,11 @@ class Datos ( object ):
     def crearIntervalos(self, datos):
         #K = 1 + 3.322 log10 N 
         n = np.column_stack(datos)
-        log = math.floor(math.log(len(n),10))
-        k = 1 + 3.322 * log
+        log = math.floor(math.log(len(datos),10))
+        k = int(1 + 3.322 * log)
         #A = (Xmax – Xmin) / K 
         a = []
-        for row in n:
+        for row in n[:-1]:
             a.append((np.amax(row) - np.amin(row))/k)
         self.k = k
         self.a = a
@@ -166,10 +167,10 @@ class Datos ( object ):
             
         for i, (fila_inter, col, a, col_min) in enumerate(zip(datosIntervalos, columns[:-1], self.a, mins)): #Itero sobre los datos correspondientes a las columnas
             for j,(attr_inter, dato) in enumerate(zip(fila_inter, col)): #por cada valor de la fila, uso el minimo de ese atributo y el "a" de ese atributo
-                fila_inter[i][j] = math.ceil((dato - col_min)/a)
+                fila_inter[j] = math.ceil((dato - col_min)/a)
         
         # for i in range(len(columns)-1):
         #     v_min = np.amin(columns[i])
         #     for j in range(len(datos)):
         #         datosIntervalos[i][j] = math.ceil((columns[i][j] - mins[j])/self.a[j])
-        return np.column_stack(datosIntervalos.tolist() + [datos[-1]])
+        return np.column_stack(datosIntervalos.tolist() + [columns[-1]])
