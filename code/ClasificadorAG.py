@@ -112,7 +112,7 @@ class ClasificadorAG(Clasificador):
             self.cromosomas = self.ordenarCromosomas()[:self.n_cromosomas] 
             recombinado = self.recombinar()     
             mutados = self.mutar()              
-            self.cromosomas = self.elitismo() + recombinado + mutados 
+            self.cromosomas = self.elitismo() + self.recombinado + self.mutados 
         
         self.hulk = self.ordenarCromosomas()[0]
     
@@ -128,7 +128,7 @@ class ClasificadorAG(Clasificador):
             self.datos = dataset.datos
             self.n_intervalos = dataset.k
             
-            if reglas:
+            if reglas != None:
                 self.reglas = reglas
             else:
                 self.reglas = set()
