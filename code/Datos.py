@@ -156,7 +156,6 @@ class Datos ( object ):
         n = np.column_stack(datos)
         log = math.floor(math.log(len(datos),10))
         k = int(1 + 3.322 * log)
-        #A = (Xmax – Xmin) / K 
         a = []
         for row in n[:-1]:
             a.append((np.amax(row) - np.amin(row))/k)
