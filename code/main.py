@@ -26,7 +26,7 @@ dataset = Datos("ConjuntosDatos/example1.data")
 n_cromosomas = 100
 n_generaciones = 50
 a, k = dataset.crearIntervalos(dataset.datos)
-ag = ClasificadorAG(n_cromosomas, dataset, n_generaciones)
+ag = ClasificadorAG(n_cromosomas, dataset, n_generaciones, False)
 
 print(ag.validacion(ValidacionSimple(), dataset, ag))
 

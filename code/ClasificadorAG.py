@@ -264,7 +264,7 @@ class ClasificadorAG(Clasificador):
             def __init__(self,dataset, regla_entera = True, valores = np.array([])):
                 self.regla_entera = regla_entera
                 self.valores = []
-                if valores.any():
+                if np.array(valores).any():
                     self.valores = copy.deepcopy(valores)
                 else:
                     if regla_entera:
