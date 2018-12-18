@@ -1,24 +1,65 @@
-
-# coding: utf-8
-
-# In[ ]:
-
-
 from Datos import Datos
 from EstrategiaParticionado import *
 from Clasificador import *
 import numpy as np
-from tabulate import tabulate
-import pprint
+# from tabulate import tabulate
+# import pprint
 from Roc import *
 
+from ClasificadorAG import *
 
-dataset = Datos("ConjuntosDatos/german.data")
 
-# nb = ClasificadorNaiveBayes(True)
-knn = ClasificadorVecinosProximos(9, True,  )
-print(knn.weight)
-pprint.pprint(np.mean(knn.validacion(ValidacionCruzada(),dataset,knn)))
+
+# dataset = Datos("ConjuntosDatos/wdbc-10.data")
+dataset = Datos("ConjuntosDatos/example1.data")
+
+# estrategia = ValidacionSimple()
+# print("Estrategia Validacion Simple:")
+
+# estrategia = ValidacionCruzada()
+# print("\nEstrategia Validacion Cruzada:")
+
+# estrategia.creaParticiones(dataset)
+
+
+
+n_cromosomas = 100
+n_generaciones = 50
+a, k = dataset.crearIntervalos(dataset.datos)
+ag = ClasificadorAG(n_cromosomas, dataset, n_generaciones)
+
+print(ag.validacion(ValidacionSimple(), dataset, ag))
+
+# clasificador = ag
+# clasificacion = []
+# hulks = []
+# for particion in estrategia.particiones:
+#     clasificador.entrenar(dataset.extraeDatosIntervalos(particion.indicesTrain))
+#     hulks.append(clasificador.hulk)
+#     clasificacion.append( clasificador.clasifica(dataset.extraeDatosIntervalos(particion.indicesTest)))
+# print(clasificacion)
+# print("\nHulks:\n")
+# print([el.fitness() for el in hulks])
+    # errores.append(clasificador.error(dataset.extraeDatosIntervalos(particion.indicesTest), clasificacion))
+
+# cromosoma = ag.entrenar(dataset.extraeDatosIntervalos(range(0,int(len(dataset.datos)/2))))
+# print(cromosoma.fitness())
+# print(ag.clasifica(dataset.extraeDatosIntervalos(range(int(len(dataset.datos)/2)+1,len(dataset.datos)))))
+# print(dataset.a)
+# print(dataset.k)
+# print(ag.datosIntervalizados)
+# print(ag.cromosomas[0].reglas.pop().valores)
+
+
+
+
+
+
+
+# # nb = ClasificadorNaiveBayes(True)
+# knn = ClasificadorVecinosProximos(9, True,  )
+# print(knn.weight)
+# pprint.pprint(np.mean(knn.validacion(ValidacionCruzada(),dataset,knn)))
 
 
 
