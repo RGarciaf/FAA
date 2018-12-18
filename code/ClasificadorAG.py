@@ -6,6 +6,7 @@ from random import randint
 from scipy.stats import norm
 import scipy
 import pprint
+import copy
 
 class Clasificador(object):
 
@@ -50,9 +51,9 @@ class Clasificador(object):
         errores = []
         particionado.creaParticiones(dataset)
         for particion in particionado.particiones:
-            clasificador.entrenamiento(dataset.extraeDatos(particion.indicesTrain), dataset.tipoAtributos, dataset.diccionarios)
-            clasificacion = clasificador.clasifica(dataset.extraeDatos(particion.indicesTest), dataset.tipoAtributos, dataset.diccionarios)
-            errores.append(clasificador.error(dataset.extraeDatos(particion.indicesTest), clasificacion))
+            clasificador.entrenar(dataset.extraeDatosIntervalos(particion.indicesTrain))
+            clasificacion = ( clasificador.clasifica(dataset.extraeDatosIntervalos(particion.indicesTest)))
+            errores.append(clasificador.error(dataset.extraeDatosIntervalos(particion.indicesTest), clasificacion))
         return errores
 
     @abstractmethod
@@ -80,7 +81,7 @@ class ClasificadorAG(Clasificador):
         for cromosoma in cromosomas:
             total_fitness += cromosoma.fitness()
             
-        print(total_fitness)
+        # print(total_fitness)
 
         if total_fitness == 0:
             return cromosomas
@@ -90,8 +91,8 @@ class ClasificadorAG(Clasificador):
         return seleccion.tolist()
         
     
-    def ordenarCromosomas(self, datos = None):
-        if datos != None:
+    def ordenarCromosomas(self, datos = np.array([])): #Hace falta que sea array aunque este vacio
+        if datos.any(): #Si existe algun elmento, se mete (si hay datos)
             for cromosoma in self.cromosomas:
                 cromosoma.fitness(datos)
         return sorted(self.cromosomas)
@@ -112,21 +113,31 @@ class ClasificadorAG(Clasificador):
         for cromosoma in self.cromosomas:
             cromosoma.mutar()
 
-    def elitismo(self, porcentaje = 2):
+    def elitismo(self, porcentaje = 20):
         indices = int((len(self.cromosomas) * porcentaje) / 100)
-        return self.cromosomas[:indices]
+        return [ self.Cromosoma(el.dataset, el.reglas, el.regla_entera) for el in self.cromosomas[:indices]] 
+        
             
-    def entrenar(self, datos = None):
+    def entrenar(self, datos =  np.array([])):
         for i in range(self.n_generaciones):
+            print("Generacion ", i, "\n\tNº Cromosomas: ",len(self.cromosomas))           
             self.cromosomas = self.ordenarCromosomas(datos)[:self.n_cromosomas] 
-            print("Generacion ", i)
-            for cromosoma in self.cromosomas:
-                print(cromosoma.fitness())
-            print("\n")
-            elite = self.elitismo()
+            
+            print("cromosomas:")
+            print([el.fitness(datos) for el in self.cromosomas])
+
+            elite = self.elitismo()            
+            print("elite:")
+            print([el.fitness(datos) for el in elite])
+            
             recombinado = self.recombinar()     
             self.mutar()              
             self.cromosomas = elite + recombinado 
+            # for el in self.cromosomas:
+            #     el.fit = -1
+            print("elite:")
+            print([el.fitness(datos) for el in elite])
+            print(len(self.cromosomas), "\n")
         
         self.hulk = self.ordenarCromosomas()[0]
         return self.hulk
@@ -140,14 +151,17 @@ class ClasificadorAG(Clasificador):
             self.regla_entera = regla_entera
             self.n_attrs = len(dataset.nombreAtributos) - 1  #nº attrs menos la clase
             # self.rlen = pow(dataset.k, self.n_attrs)
-            self.rlen = randint(1, pow(dataset.k, self.n_attrs))
-            # self.rlen = randint(1, 20)
+            # self.rlen = randint(1, pow(dataset.k, self.n_attrs))
+            self.rlen = randint(1, 100)
             self.datos = dataset.convertirAIntervalos(dataset.datos)
             self.n_intervalos = dataset.k
             self.dataset = dataset
+            self.prior = 0
             
             if reglas != None:
-                self.reglas = reglas
+                self.reglas = set()
+                for regla in reglas:
+                    self.reglas.add(self.Regla(dataset,regla_entera,regla.valores))
             else:
                 self.reglas = set()
                 self.generarReglas(dataset)
@@ -164,38 +178,59 @@ class ClasificadorAG(Clasificador):
                     
                 self.reglas.add(regla)
         
-        def fitness(self, datos = None):
-            if datos == None and self.fit > -1:
-                return self.fit
-            
-            if datos == None:
-                datos = self.datos
-            
+        def fitness(self, datos = np.array([])):
+            if not datos.any():     #Si no se cumple que alguno de los datos exista, porque no hay ninguno, se mete
+                if self.fit > -1:   
+                    return self.fit
+                else:
+                    datos = self.datos            
             
             self.fit = 0
             for fila in datos:
                 self.fit += self.compruebaReglas(fila)
             self.fit /= len(datos)
+            c, counts = np.unique(datos[-1], return_counts=True)
+            if counts[0] < counts[1]:
+                self.prior = 1
+            else:
+                self.prior = 0
             
             return self.fit
             
         def compruebaReglas(self, fila):
+            if self.clasificaReglas(fila) == fila[-1]:
+                return 1
+            return 0
+
+        def clasificaReglas(self, fila):
+            aciertos = 0
+            nreglas = 0
             for regla in self.reglas:
-                if regla.compruebaRegla(fila) == 1:
-                    return 1
-            return 0;
+                if regla.clasifica(fila) == 1:
+                    aciertos += regla.valores[-1]
+                    nreglas += 1
+            if nreglas > 0:
+                aciertos /= nreglas
+                return round(aciertos)
+            return self.prior
+            
             
         def clasifica(self, datos):
-            clase = {0:0,1:0}
+            clase = []
             for fila in datos:
-                if self.compruebaReglas(fila) == 1:
-                    clase[fila[-1]] += 1
-            return clase;
+                # print(fila[-1])                   
+                clase.append(self.clasificaReglas(fila))
+            return clase
         
         def __lt__(self, other):
-            #print("Estoy en el sorted")
-            #print(type(self),type(other) )
+            # print("Estoy en el lt")
+            # print(self.fitness(), " > ", other.fitness(), self.fitness() > other.fitness() )
             return self.fitness() > other.fitness()
+
+        def __gt__(self, other):
+            # print("Estoy en el gt")
+            # print(self.fitness(), " < ", other.fitness(), self.fitness() < other.fitness() )
+            return self.fitness() < other.fitness()
             
         def recombinar(self, cromosoma):
             if tirarDado(99) < 80:
@@ -226,19 +261,23 @@ class ClasificadorAG(Clasificador):
             
         
         class Regla():
-            def __init__(self,dataset, regla_entera = True):
+            def __init__(self,dataset, regla_entera = True, valores = np.array([])):
                 self.regla_entera = regla_entera
                 self.valores = []
+                if valores.any():
+                    self.valores = copy.deepcopy(valores)
+                else:
+                    if regla_entera:
+                        self.valores = np.append(np.random.randint(dataset.k + 1, size = len(dataset.nombreAtributos)-1), np.random.randint(len(dataset.diccionarios['Class']), size = 1))
+                    else:
+                        regla = []
+                        for _ in range(len(dataset.nombreAtributos)-1):
+                            regla.append(np.random.randint(2, size = dataset.k).tolist())
+                        regla.append(np.random.randint(len(dataset.diccionarios['Class']), size = 1)[0])
+                        self.valores = regla
                 self.n_intervalos = dataset.k  #nº attrs menos la clase
                 
-                if regla_entera:
-                    self.valores = np.append(np.random.randint(dataset.k + 1, size = len(dataset.nombreAtributos)-1), np.random.randint(len(dataset.diccionarios['Class']), size = 1))
-                else:
-                    regla = []
-                    for _ in range(len(dataset.nombreAtributos)-1):
-                        regla.append(np.random.randint(2, size = dataset.k).tolist())
-                    regla.append(np.random.randint(len(dataset.diccionarios['Class']), size = 1)[0])
-                    self.valores = regla
+                
                     
             def compruebaRegla(self, fila):
                 if self.regla_entera:
@@ -254,6 +293,18 @@ class ClasificadorAG(Clasificador):
                 if fila[-1] == self.valores[-1]:
                     return 1
                 return 0
+
+            def clasifica(self, fila):
+                if self.regla_entera:
+                    for dato_fila, dato_regla in zip(fila[:-1], self.valores[:-1]):
+                        if dato_regla != 0 and dato_regla != dato_fila:
+                            return 0
+                else:
+                    for dato_fila, dato_regla in zip(fila[:-1], self.valores[:-1]):
+                        if np.sum(dato_regla) > 0:
+                            if self.compruebaAtributo(dato_fila,dato_regla) == 0:
+                                return 0                            
+                return 1
                     
             def compruebaAtributo(self, dato_fila, intervalos):
                 for index, intervalo in enumerate(intervalos):

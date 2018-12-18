@@ -10,14 +10,41 @@ from ClasificadorAG import *
 
 
 
-dataset = Datos("ConjuntosDatos/wdbc-10.data")
-dataset.datosIntervalizados
-n_cromosomas = 5
-n_generaciones = 5
+# dataset = Datos("ConjuntosDatos/wdbc-10.data")
+dataset = Datos("ConjuntosDatos/example1.data")
+
+# estrategia = ValidacionSimple()
+# print("Estrategia Validacion Simple:")
+
+# estrategia = ValidacionCruzada()
+# print("\nEstrategia Validacion Cruzada:")
+
+# estrategia.creaParticiones(dataset)
+
+
+
+n_cromosomas = 100
+n_generaciones = 50
 a, k = dataset.crearIntervalos(dataset.datos)
 ag = ClasificadorAG(n_cromosomas, dataset, n_generaciones)
-cromosoma = ag.entrenar()
-print(cromosoma.fitness())
+
+print(ag.validacion(ValidacionSimple(), dataset, ag))
+
+# clasificador = ag
+# clasificacion = []
+# hulks = []
+# for particion in estrategia.particiones:
+#     clasificador.entrenar(dataset.extraeDatosIntervalos(particion.indicesTrain))
+#     hulks.append(clasificador.hulk)
+#     clasificacion.append( clasificador.clasifica(dataset.extraeDatosIntervalos(particion.indicesTest)))
+# print(clasificacion)
+# print("\nHulks:\n")
+# print([el.fitness() for el in hulks])
+    # errores.append(clasificador.error(dataset.extraeDatosIntervalos(particion.indicesTest), clasificacion))
+
+# cromosoma = ag.entrenar(dataset.extraeDatosIntervalos(range(0,int(len(dataset.datos)/2))))
+# print(cromosoma.fitness())
+# print(ag.clasifica(dataset.extraeDatosIntervalos(range(int(len(dataset.datos)/2)+1,len(dataset.datos)))))
 # print(dataset.a)
 # print(dataset.k)
 # print(ag.datosIntervalizados)
