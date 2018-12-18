@@ -91,7 +91,7 @@ class ClasificadorAG(Clasificador):
         a, k = dataset.crearIntervalos(dataset.datos)
         self.datosIntervalizados = dataset.convertirAIntervalos(dataset.datos)
         for _ in range(n_cromosomas):
-            self.cromosomas.append(self.Cromosoma(dataset, regla_entera))
+            self.cromosomas.append(self.Cromosoma(dataset, regla_entera = regla_entera))
     
     def recombinar(self):
         poblacion = []
@@ -131,7 +131,7 @@ class ClasificadorAG(Clasificador):
             self.rlen = randint(2, 20)
             self.datos = dataset.datos
             self.n_intervalos = dataset.k
-            
+            print("hola reglas", 
             if reglas:
                 self.reglas = reglas
             else:
@@ -211,15 +211,21 @@ class ClasificadorAG(Clasificador):
                 self.regla_entera = regla_entera
                 self.valores = []
                 self.n_intervalos = dataset.k  #nº attrs menos la clase
+                print("hola")
                 
                 if regla_entera:
+                    print("hola1")
                     self.valores = np.append(np.random.randint(dataset.k + 1, size = len(dataset.nombreAtributos)-1), np.random.randint(len(dataset.diccionarios['Class']), size = 1))
+                    print("regla entera", self.valores)
                 else:
+                    print("hola2")
                     regla = []
                     for _ in range(len(dataset.nombreAtributos)-1):
+                        
                         regla.append(np.random.randint(1, size = dataset.k))
                     regla.append(np.random.randint(len(dataset.diccionarios['Class']), size = 1))
                     self.valores = regla
+                    print("regla binaria", self.valores)
                     
             def compruebaRegla(self, fila):
                 if self.regla_entera:
