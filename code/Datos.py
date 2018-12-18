@@ -117,6 +117,13 @@ class Datos ( object ):
             subconjunto = np.append(subconjunto, self.datos[i])
         subconjunto = subconjunto.reshape((len(idx), len(self.nombreAtributos)))
         return subconjunto
+    
+    def extraeDatosIntervalos(self, idx):
+        subconjunto = []
+        for i in idx:
+            subconjunto = np.append(subconjunto, self.datosIntervalizados[i])
+        subconjunto = subconjunto.reshape((len(idx), len(self.nombreAtributos)))
+        return subconjunto
         
     def attrToIndex(self):
         nominal = []

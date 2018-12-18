@@ -122,9 +122,9 @@ class ClasificadorAG(Clasificador):
             
     def entrenar(self, datos =  np.array([])):
         for i in range(self.n_generaciones):
-            print("\tGeneracion ", i)           
+            print("\tGeneracion ", i,"-> Fitness mejor individuo = ", self.cromosomas[0].fitness(datos))           
             self.cromosomas = self.ordenarCromosomas(datos)[:self.n_cromosomas] 
-            self.hulk_gen.append(self.cromosomas[0])
+            self.hulk_gen.append(self.cromosomas[0].fitness(datos))
             self.media_gen.append(np.sum([el.fitness(datos) for el in self.cromosomas])/len(self.cromosomas)) 
             #print("cromosomas:")
             #print([el.fitness(datos) for el in self.cromosomas])
