@@ -66,7 +66,7 @@ class ClasificadorAG(Clasificador):
     def __init__(self, n_cromosomas, dataset, n_generaciones, regla_entera = True):
         self.n_generaciones = n_generaciones
         self.cromosomas = []
-        self.datosIntervalizados = []
+        #self.datosIntervalizados = []
         self.n_cromosomas = n_cromosomas
         self.generarPoblacion(n_cromosomas, dataset, regla_entera)
         self.hulk = None
@@ -74,50 +74,62 @@ class ClasificadorAG(Clasificador):
         
     @staticmethod
     def ruleta_rusa(cromosomas, n_individuos):
-        seleccion = np.array()
-        total_fitness = np.sum(map(lambda x:x.fitness(),cromosomas))
+        seleccion, probabilidades = [], []
+
+        total_fitness = 0
         for cromosoma in cromosomas:
-            seleccion = np.append(seleccion, 
-                            np.tile(cromosoma, 
-                                    int((cromosoma.fitness()/total_fitness) * n_individuos)))
-        
-        return seleccion
+            total_fitness += cromosoma.fitness()
+            
+        print(total_fitness)
+
+        if total_fitness == 0:
+            return cromosomas
+        for cromosoma in cromosomas:
+            probabilidades.append(cromosoma.fitness()/total_fitness)
+        seleccion = np.random.choice(cromosomas, n_individuos, p=probabilidades)
+        return seleccion.tolist()
         
     
-    def ordenarCromosomas(self):
+    def ordenarCromosomas(self, datos = None):
+        if datos != None:
+            for cromosoma in self.cromosomas:
+                cromosoma.fitness(datos)
         return sorted(self.cromosomas)
     
     def generarPoblacion(self, n_cromosomas, dataset, regla_entera):
-        a, k = dataset.crearIntervalos(dataset.datos)
-        self.datosIntervalizados = dataset.convertirAIntervalos(dataset.datos)
         for _ in range(n_cromosomas):
-            self.cromosomas.append(self.Cromosoma(dataset, regla_entera))
-    
+            self.cromosomas.append(self.Cromosoma(dataset = dataset, regla_entera=regla_entera))
+
     def recombinar(self):
         poblacion = []
         ruleta = ClasificadorAG.ruleta_rusa(self.cromosomas,len(self.cromosomas))
         for cromosoma in self.cromosomas:
-            poblacion.append(cromosoma.recombinar(ruleta.pop(random.randint(0, len (ruleta)))))
+            poblacion.append(cromosoma.recombinar(ruleta.pop(random.randint(0, len (ruleta) - 1))))
         return poblacion
     
     def mutar(self):
         poblacion = []
         for cromosoma in self.cromosomas:
-            poblacion.append(cromosoma.mutar())
-        return poblacion
-    
+            cromosoma.mutar()
+
     def elitismo(self, porcentaje = 2):
         indices = int((len(self.cromosomas) * porcentaje) / 100)
         return self.cromosomas[:indices]
             
-    def entrenar(self, datos):
-        for _ in range(self.n_generaciones):
-            self.cromosomas = self.ordenarCromosomas()[:self.n_cromosomas] 
+    def entrenar(self, datos = None):
+        for i in range(self.n_generaciones):
+            self.cromosomas = self.ordenarCromosomas(datos)[:self.n_cromosomas] 
+            print("Generacion ", i)
+            for cromosoma in self.cromosomas:
+                print(cromosoma.fitness())
+            print("\n")
+            elite = self.elitismo()
             recombinado = self.recombinar()     
-            mutados = self.mutar()              
-            self.cromosomas = self.elitismo() + self.recombinado + self.mutados 
+            self.mutar()              
+            self.cromosomas = elite + recombinado 
         
         self.hulk = self.ordenarCromosomas()[0]
+        return self.hulk
     
     def clasifica(self, datos):
         return self.hulk.clasifica(datos)
@@ -127,10 +139,12 @@ class ClasificadorAG(Clasificador):
         def __init__(self, dataset, reglas = None, regla_entera = True):
             self.regla_entera = regla_entera
             self.n_attrs = len(dataset.nombreAtributos) - 1  #nº attrs menos la clase
-            #self.rlen = randint(1, pow(dataset.k, self.n_attrs))
-            self.rlen = randint(2, 20)
-            self.datos = dataset.datos
+            # self.rlen = pow(dataset.k, self.n_attrs)
+            self.rlen = randint(1, pow(dataset.k, self.n_attrs))
+            # self.rlen = randint(1, 20)
+            self.datos = dataset.convertirAIntervalos(dataset.datos)
             self.n_intervalos = dataset.k
+            self.dataset = dataset
             
             if reglas != None:
                 self.reglas = reglas
@@ -151,16 +165,18 @@ class ClasificadorAG(Clasificador):
                 self.reglas.add(regla)
         
         def fitness(self, datos = None):
-            if not datos and self.fit > -1:
+            if datos == None and self.fit > -1:
                 return self.fit
             
-            if not datos:
+            if datos == None:
                 datos = self.datos
-                
+            
+            
+            self.fit = 0
             for fila in datos:
                 self.fit += self.compruebaReglas(fila)
             self.fit /= len(datos)
-                
+            
             return self.fit
             
         def compruebaReglas(self, fila):
@@ -177,7 +193,9 @@ class ClasificadorAG(Clasificador):
             return clase;
         
         def __lt__(self, other):
-            return self.fitness() < other.fitness()
+            #print("Estoy en el sorted")
+            #print(type(self),type(other) )
+            return self.fitness() > other.fitness()
             
         def recombinar(self, cromosoma):
             if tirarDado(99) < 80:
@@ -199,12 +217,13 @@ class ClasificadorAG(Clasificador):
             medio = round(len(self.reglas)/2)
             medio_other = round(len(cromosoma.reglas)/2)
             
-            return Cromosoma(self.dataset, reglas = self.reglas[:medio] + cromosoma.reglas[:medio_other], regla_entera = self.regla_entera )
+            return ClasificadorAG.Cromosoma(self.dataset, reglas = set(list(self.reglas)[:medio] + list(cromosoma.reglas)[:medio_other]), regla_entera = self.regla_entera )
         
         def mutar(self, porcentaje = 4):
             for regla in self.reglas:
                 if tirarDado(99) < porcentaje:
                     regla.mutar(porcentaje)
+            
         
         class Regla():
             def __init__(self,dataset, regla_entera = True):
@@ -217,8 +236,8 @@ class ClasificadorAG(Clasificador):
                 else:
                     regla = []
                     for _ in range(len(dataset.nombreAtributos)-1):
-                        regla.append(np.random.randint(1, size = dataset.k))
-                    regla.append(np.random.randint(len(dataset.diccionarios['Class']), size = 1))
+                        regla.append(np.random.randint(2, size = dataset.k).tolist())
+                    regla.append(np.random.randint(len(dataset.diccionarios['Class']), size = 1)[0])
                     self.valores = regla
                     
             def compruebaRegla(self, fila):

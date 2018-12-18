@@ -1,24 +1,38 @@
-
-# coding: utf-8
-
-# In[ ]:
-
-
 from Datos import Datos
 from EstrategiaParticionado import *
 from Clasificador import *
 import numpy as np
-from tabulate import tabulate
-import pprint
+# from tabulate import tabulate
+# import pprint
 from Roc import *
 
+from ClasificadorAG import *
 
-dataset = Datos("ConjuntosDatos/german.data")
 
-# nb = ClasificadorNaiveBayes(True)
-knn = ClasificadorVecinosProximos(9, True,  )
-print(knn.weight)
-pprint.pprint(np.mean(knn.validacion(ValidacionCruzada(),dataset,knn)))
+
+dataset = Datos("ConjuntosDatos/wdbc-10.data")
+dataset.datosIntervalizados
+n_cromosomas = 5
+n_generaciones = 5
+a, k = dataset.crearIntervalos(dataset.datos)
+ag = ClasificadorAG(n_cromosomas, dataset, n_generaciones)
+cromosoma = ag.entrenar()
+print(cromosoma.fitness())
+# print(dataset.a)
+# print(dataset.k)
+# print(ag.datosIntervalizados)
+# print(ag.cromosomas[0].reglas.pop().valores)
+
+
+
+
+
+
+
+# # nb = ClasificadorNaiveBayes(True)
+# knn = ClasificadorVecinosProximos(9, True,  )
+# print(knn.weight)
+# pprint.pprint(np.mean(knn.validacion(ValidacionCruzada(),dataset,knn)))
 
 
 

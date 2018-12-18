@@ -107,7 +107,7 @@ class Datos ( object ):
         self.mediaDesvAtributos = {}
         self.k = None
         self.a = None
-
+        self.datosIntervalizados = []
     
         
 
@@ -168,9 +168,6 @@ class Datos ( object ):
         for i, (fila_inter, col, a, col_min) in enumerate(zip(datosIntervalos, columns[:-1], self.a, mins)): #Itero sobre los datos correspondientes a las columnas
             for j,(attr_inter, dato) in enumerate(zip(fila_inter, col)): #por cada valor de la fila, uso el minimo de ese atributo y el "a" de ese atributo
                 fila_inter[j] = math.ceil((dato - col_min)/a)
-        
-        # for i in range(len(columns)-1):
-        #     v_min = np.amin(columns[i])
-        #     for j in range(len(datos)):
-        #         datosIntervalos[i][j] = math.ceil((columns[i][j] - mins[j])/self.a[j])
+                
+        self.datosIntervalizados = np.column_stack(datosIntervalos.tolist() + [columns[-1]])
         return np.column_stack(datosIntervalos.tolist() + [columns[-1]])
