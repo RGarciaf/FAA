@@ -117,13 +117,6 @@ class Datos ( object ):
             subconjunto = np.append(subconjunto, self.datos[i])
         subconjunto = subconjunto.reshape((len(idx), len(self.nombreAtributos)))
         return subconjunto
-
-    def extraeDatosIntervalos(self, idx):
-        subconjunto = []
-        for i in idx:
-            subconjunto = np.append(subconjunto, self.datosIntervalizados[i])
-        subconjunto = subconjunto.reshape((len(idx), len(self.nombreAtributos)))
-        return subconjunto
         
     def attrToIndex(self):
         nominal = []
@@ -156,6 +149,7 @@ class Datos ( object ):
         n = np.column_stack(datos)
         log = math.floor(math.log(len(datos),10))
         k = int(1 + 3.322 * log)
+        #A = (Xmax – Xmin) / K 
         a = []
         for row in n[:-1]:
             a.append((np.amax(row) - np.amin(row))/k)

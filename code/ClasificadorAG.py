@@ -71,6 +71,8 @@ class ClasificadorAG(Clasificador):
         self.n_cromosomas = n_cromosomas
         self.generarPoblacion(n_cromosomas, dataset, regla_entera)
         self.hulk = None
+        self.hulk_gen = []
+        self.media_gen = []
         
         
     @staticmethod
@@ -122,7 +124,8 @@ class ClasificadorAG(Clasificador):
         for i in range(self.n_generaciones):
             print("\tGeneracion ", i)           
             self.cromosomas = self.ordenarCromosomas(datos)[:self.n_cromosomas] 
-            
+            self.hulk_gen.append(self.cromosomas[0])
+            self.media_gen.append(np.sum([el.fitness(datos) for el in self.cromosomas])/len(self.cromosomas)) 
             #print("cromosomas:")
             #print([el.fitness(datos) for el in self.cromosomas])
 
@@ -138,7 +141,8 @@ class ClasificadorAG(Clasificador):
             #print("elite:")
             #print([el.fitness(datos) for el in elite])
             #print(len(self.cromosomas), "\n")
-        
+            
+            
         self.hulk = self.ordenarCromosomas()[0]
         return self.hulk
     
